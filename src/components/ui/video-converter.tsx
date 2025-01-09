@@ -1,17 +1,11 @@
 "use client"
 
-import { useState } from 'react'
 import { klingaiClient } from '@/api/klingai'
 import { Button } from "@/components/ui/button"
+import { useVideoConverter } from '@/hooks/useVideoConverter'
 
 export function VideoConverter() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [videoUrl, setVideoUrl] = useState<string | null>(null)
-  const [prompt, setPrompt] = useState<string>('dancing, Create a natural, fluid animation with subtle human-like movements:- Maintain gentle, organic motion- Add slight breathing movement- Include minimal head tilt and micro-expressions- Ensure smooth transitions between frames- Keep movements delicate and realistic- Preserve the original image quality- Apply natural motion physics')
-  const [negative_prompt, setNegativePrompt] = useState<string>('nsfw, lowres, (worst quality, bad quality:1.2), bad anatomy, sketch, jpeg artifacts, signature, watermark, old, oldest, censored, bar_censor, (pregnant), chibi, loli, simple background')
-  const [imageUrl, setImageUrl] = useState<string>('')
-  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
+  const [state, actions] = useVideoConverter()
 
   // Base64文字列からプレフィックスを削除する関数
   const removeBase64Prefix = (base64String: string): string => {
@@ -58,9 +52,9 @@ export function VideoConverter() {
     reader.onloadend = () => {
       if (typeof reader.result === 'string') {
         // プレビュー用にはフルのData URLを使用
-        setImagePreviewUrl(reader.result)
+        actions.setImagePreviewUrl(reader.result)
         // API送信用には Base64 部分のみを抽出して保存
-        setImageUrl(removeBase64Prefix(reader.result))
+        actions.setImageUrl(removeBase64Prefix(reader.result))
       }
     }
     reader.readAsDataURL(file)
@@ -72,36 +66,36 @@ export function VideoConverter() {
     switch (status.status) {
       case 'completed':
         if (status.video_url) {
-          setVideoUrl(status.video_url)
-          setIsLoading(false)
+          actions.setVideoUrl(status.video_url)
+          actions.setIsLoading(false)
         }
         return true
       case 'failed':
-        setError('動画の生成に失敗しました')
-        setIsLoading(false)
+        actions.setError('動画の生成に失敗しました')
+        actions.setIsLoading(false)
         return true
       case 'processing':
         return false
       default:
-        setError('不明なステータスです')
-        setIsLoading(false)
+        actions.setError('不明なステータスです')
+        actions.setIsLoading(false)
         return true
     }
   }
 
   const handleConversion = async () => {
     try {
-      setIsLoading(true)
-      setError(null)
-      setVideoUrl(null)
+      actions.setIsLoading(true)
+      actions.setError(null)
+      actions.setVideoUrl(null)
 
       const result = await klingaiClient.createImageToVideoTask({
-        image: imageUrl,
+        image: state.imageUrl,
         model_name: "kling-v1-6",
         mode: "std",
         duration: "5",
-        prompt,
-        negative_prompt,
+        prompt: state.prompt,
+        negative_prompt: state.negative_prompt,
         cfg_scale: 0.5,
         // 他のオプションパラメータ
       })
@@ -118,8 +112,8 @@ export function VideoConverter() {
       await pollStatus()
     } catch (error) {
       console.error('Error:', error)
-      setError('エラーが発生しました')
-      setIsLoading(false)
+      actions.setError('エラーが発生しました')
+      actions.setIsLoading(false)
     }
   }
 
@@ -128,8 +122,8 @@ export function VideoConverter() {
       <div>
         <label htmlFor="prompt">Prompt</label>
         <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
+          value={state.prompt}
+          onChange={(e) => actions.setPrompt(e.target.value)}
           placeholder="Enter your prompt here..."
           style={{
             width: '100%',
@@ -143,8 +137,8 @@ export function VideoConverter() {
       <div>
         <label htmlFor="negative_prompt">Negative Prompt</label>
         <textarea
-          value={negative_prompt}
-          onChange={(e) => setNegativePrompt(e.target.value)}
+          value={state.negative_prompt}
+          onChange={(e) => actions.setNegativePrompt(e.target.value)}
           placeholder="Enter your negative prompt here..."
           style={{
             width: '100%',
@@ -168,9 +162,9 @@ export function VideoConverter() {
             marginBottom: '16px'
           }}
         />
-        {imagePreviewUrl && (
+        {state.imagePreviewUrl && (
           <img
-            src={imagePreviewUrl} // プレビュー用にはフルのData URLを使用
+            src={state.imagePreviewUrl} // プレビュー用にはフルのData URLを使用
             alt="Preview"
             style={{
               maxWidth: '100%',
@@ -182,26 +176,26 @@ export function VideoConverter() {
 
       <Button
         onClick={handleConversion}
-        loading={isLoading}
+        loading={state.isLoading}
         loadingText="生成中..."
-        disabled={!imageUrl || isLoading}
+        disabled={!state.imageUrl || state.isLoading}
       >
         動画を生成
       </Button>
 
-      {error && (
+      {state.error && (
         <div className="text-red-500 mt-4">
-          {error}
+          {state.error}
         </div>
       )}
 
-      {isLoading && (
+      {state.isLoading && (
         <div className="mt-4">
           動画を生成中です。しばらくお待ちください...
         </div>
       )}
 
-      {videoUrl && (
+      {state.videoUrl && (
         <div className="mt-4">
           <h3 className="mb-2">生成された動画:</h3>
           <video
@@ -210,13 +204,13 @@ export function VideoConverter() {
             loop
             className="w-full max-w-2xl"
           >
-            <source src={videoUrl} type="video/mp4" />
+            <source src={state.videoUrl} type="video/mp4" />
             お使いのブラウザは動画の再生に対応していません。
           </video>
 
           <div className="mt-2">
             <a
-              href={videoUrl}
+              href={state.videoUrl}
               download="generated-video.mp4"
               className="text-blue-500 hover:text-blue-700"
             >
