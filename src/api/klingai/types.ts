@@ -51,7 +51,7 @@ export const VALIDATION = {
     MIN: 0,
     MAX: 1
   }
-} as const;
+} as const
 
 export interface TaskResponse {
   task_id: string
