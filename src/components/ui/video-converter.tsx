@@ -2,62 +2,23 @@
 
 import { klingaiClient } from '@/api/klingai'
 import { Button } from "@/components/ui/button"
-import { useVideoConverter } from '@/hooks/useVideoConverter'
+import { useVideoConverter, useImageProcessor } from '@/hooks'
+import NextImage from 'next/image'
 
 export function VideoConverter() {
   const [state, actions] = useVideoConverter()
 
-  // Base64文字列からプレフィックスを削除する関数
-  const removeBase64Prefix = (base64String: string): string => {
-    // "data:image/jpeg;base64," や "data:image/png;base64," などのプレフィックスを削除
-    const base64Prefix = /^data:image\/[a-z]+;base64,/
-    return base64String.replace(base64Prefix, '')
-  }
-
-  // 画像のバリデーション
-  const validateImage = (file: File): Promise<boolean> => {
-    return new Promise((resolve) => {
-      const img = new Image()
-      img.onload = () => {
-        const isValidResolution = img.width >= 300 && img.height >= 300
-        const aspectRatio = img.width / img.height
-        const isValidAspectRatio = aspectRatio >= 1 / 2.5 && aspectRatio <= 2.5
-        const isValidSize = file.size <= 10 * 1024 * 1024 // 10MB
-
-        resolve(isValidResolution && isValidAspectRatio && isValidSize)
-      }
-      img.src = URL.createObjectURL(file)
-    })
-  }
+  const { processImage, imageUrl, imagePreviewUrl } = useImageProcessor()
 
   // ファイル選択時の処理
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // ファイル形式のチェック
-    if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {
-      alert('JPG または PNG 形式の画像のみ対応しています。')
-      return
+    const { isValid, error } = await processImage(file)
+    if (!isValid && error) {
+      alert(error)
     }
-
-    // 画像のバリデーション
-    const isValid = await validateImage(file)
-    if (!isValid) {
-      alert('画像は300x300px以上、アスペクト比1:2.5〜2.5:1の範囲内、10MB以下である必要があります。')
-      return
-    }
-
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      if (typeof reader.result === 'string') {
-        // プレビュー用にはフルのData URLを使用
-        actions.setImagePreviewUrl(reader.result)
-        // API送信用には Base64 部分のみを抽出して保存
-        actions.setImageUrl(removeBase64Prefix(reader.result))
-      }
-    }
-    reader.readAsDataURL(file)
   }
 
   const checkTaskStatus = async (taskId: string) => {
@@ -90,7 +51,7 @@ export function VideoConverter() {
       actions.setVideoUrl(null)
 
       const result = await klingaiClient.createImageToVideoTask({
-        image: state.imageUrl,
+        image: imageUrl || '',
         model_name: "kling-v1-6",
         mode: "std",
         duration: "5",
@@ -162,9 +123,9 @@ export function VideoConverter() {
             marginBottom: '16px'
           }}
         />
-        {state.imagePreviewUrl && (
-          <img
-            src={state.imagePreviewUrl} // プレビュー用にはフルのData URLを使用
+        {imagePreviewUrl && (
+          <NextImage
+            src={imagePreviewUrl} // プレビュー用にはフルのData URLを使用
             alt="Preview"
             style={{
               maxWidth: '100%',
@@ -178,7 +139,7 @@ export function VideoConverter() {
         onClick={handleConversion}
         loading={state.isLoading}
         loadingText="生成中..."
-        disabled={!state.imageUrl || state.isLoading}
+        disabled={!imageUrl || state.isLoading}
       >
         動画を生成
       </Button>

@@ -6,8 +6,6 @@ interface VideoConverterState {
   videoUrl: string | null
   prompt: string
   negative_prompt: string
-  imageUrl: string
-  imagePreviewUrl: string | null
 }
 
 interface VideoConverterActions {
@@ -16,8 +14,6 @@ interface VideoConverterActions {
   setVideoUrl: (url: string | null) => void
   setPrompt: (prompt: string) => void
   setNegativePrompt: (prompt: string) => void
-  setImageUrl: (url: string) => void
-  setImagePreviewUrl: (url: string | null) => void
 }
 
 export function useVideoConverter(): [VideoConverterState, VideoConverterActions] {
@@ -39,8 +35,6 @@ export function useVideoConverter(): [VideoConverterState, VideoConverterActions
     'jpeg artifacts, signature, watermark, old, oldest, censored, bar_censor, ' +
     '(pregnant), chibi, loli, simple background'
   )
-  const [imageUrl, setImageUrl] = useState<string>('')
-  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
 
   return [
     {
@@ -49,8 +43,6 @@ export function useVideoConverter(): [VideoConverterState, VideoConverterActions
       videoUrl,
       prompt,
       negative_prompt,
-      imageUrl,
-      imagePreviewUrl,
     },
     {
       setIsLoading,
@@ -58,8 +50,6 @@ export function useVideoConverter(): [VideoConverterState, VideoConverterActions
       setVideoUrl,
       setPrompt,
       setNegativePrompt,
-      setImageUrl,
-      setImagePreviewUrl,
     }
   ]
 }
