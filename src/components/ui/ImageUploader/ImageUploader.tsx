@@ -1,4 +1,7 @@
+'use client'
+
 import NextImage from 'next/image'
+import { useState } from 'react'
 
 import { ImageUploadProps } from './types'
 
@@ -9,11 +12,48 @@ export function ImageUploader({
   acceptTypes = 'image/jpeg,image/jpg,image/png',
   className,
 }: ImageUploadProps) {
+  const [isDragging, setIsDragging] = useState(false)
+
+  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+
+    const files = e.dataTransfer.files
+    if (files && files.length > 0) {
+      const event = {
+        target: {
+          files: files,
+        },
+      } as unknown as React.ChangeEvent<HTMLInputElement>
+      onSelectImage(event)
+    }
+  }
+
   return (
     <div className={className}>
       <label
         htmlFor="image"
-        className="relative flex flex-col items-center justify-center w-full h-80 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 overflow-hidden"
+        className={`relative flex flex-col items-center justify-center w-full h-80 border-2 ${
+          isDragging
+            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+            : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
+        } border-dashed rounded-lg cursor-pointer overflow-hidden`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
       >
         {imagePreviewUrl ? (
           <>
