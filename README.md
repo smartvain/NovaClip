@@ -1,3 +1,6 @@
+# KlingAI API Document
+https://docs.qingque.cn/d/home/eZQCQxBrX8eeImjK6Ddz5iOi5
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
