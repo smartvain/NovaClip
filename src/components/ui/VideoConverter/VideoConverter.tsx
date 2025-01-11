@@ -1,18 +1,34 @@
 'use client'
 
+import { useState } from 'react'
+
 import { klingaiClient } from '@/api/klingai'
+import { PromptTextarea } from '@/components/ui'
+import { ImageUploader } from '@/components/ui'
 import { Button } from '@/components/ui/button'
 import { useImageProcessor } from '@/hooks'
-import NextImage from 'next/image'
-import { useEffect, useState } from 'react'
-import { PromptTextarea } from '@/components/ui'
+
+const initialPrompt =
+  'dancing, Create a natural, fluid animation with subtle human-like movements:' +
+  '- Maintain gentle, organic motion' +
+  '- Add slight breathing movement' +
+  '- Include minimal head tilt and micro-expressions' +
+  '- Ensure smooth transitions between frames' +
+  '- Keep movements delicate and realistic' +
+  '- Preserve the original image quality' +
+  '- Apply natural motion physics'
+
+const initialNegativePrompt =
+  'nsfw, lowres, (worst quality, bad quality:1.2), bad anatomy, sketch, ' +
+  'jpeg artifacts, signature, watermark, old, oldest, censored, bar_censor, ' +
+  '(pregnant), chibi, loli, simple background'
 
 export function VideoConverter() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [videoUrl, setVideoUrl] = useState<string | null>(null)
-  const [prompt, setPrompt] = useState<string>('')
-  const [negative_prompt, setNegativePrompt] = useState<string>('')
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string>('')
+  const [videoUrl, setVideoUrl] = useState<string>('')
+  const [prompt, setPrompt] = useState<string>(initialPrompt)
+  const [negative_prompt, setNegativePrompt] = useState<string>(initialNegativePrompt)
 
   const { processImage, imageUrl, imagePreviewUrl, setImageUrl, setImagePreviewUrl } =
     useImageProcessor()
@@ -88,72 +104,29 @@ export function VideoConverter() {
     }
   }
 
-  const initialPrompt =
-    'dancing, Create a natural, fluid animation with subtle human-like movements:' +
-    '- Maintain gentle, organic motion' +
-    '- Add slight breathing movement' +
-    '- Include minimal head tilt and micro-expressions' +
-    '- Ensure smooth transitions between frames' +
-    '- Keep movements delicate and realistic' +
-    '- Preserve the original image quality' +
-    '- Apply natural motion physics'
-  useEffect(() => {
-    setPrompt(initialPrompt)
-  }, [])
-
-  const initialNegativePrompt =
-    'nsfw, lowres, (worst quality, bad quality:1.2), bad anatomy, sketch, ' +
-    'jpeg artifacts, signature, watermark, old, oldest, censored, bar_censor, ' +
-    '(pregnant), chibi, loli, simple background'
-  useEffect(() => {
-    setNegativePrompt(initialNegativePrompt)
-  }, [])
-
   return (
     <div className="flex">
-      {/* 左側のフォームエリア */}
       <div className="w-[400px] flex-shrink-0 p-4 border-r h-screen overflow-y-auto">
+        {/* ポジティブプロンプト */}
         <PromptTextarea
           label="Prompt"
           value={prompt}
           onChange={setPrompt}
           placeholder="Enter your prompt here..."
         />
-
+        {/* ネガティブプロンプト */}
         <PromptTextarea
           label="Negative Prompt"
           value={negative_prompt}
           onChange={setNegativePrompt}
           placeholder="Enter your negative prompt here..."
         />
-
-        <div>
-          <input
-            type="file"
-            id="image"
-            accept="image/jpeg,image/jpg,image/png"
-            onChange={handleSelectImage}
-            className="w-full p-2 mb-4"
-          />
-          {imagePreviewUrl && (
-            <div className="relative">
-              <NextImage
-                src={imagePreviewUrl}
-                alt="Preview"
-                width={500}
-                height={400}
-                className="w-full h-[400px] object-contain mb-4"
-              />
-              <button
-                onClick={handleRemovePreviewImage}
-                className="absolute top-2 right-2 bg-gray-600 text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-700"
-                aria-label="画像を削除"
-              >
-                ✕
-              </button>
-            </div>
-          )}
-        </div>
+        {/* 画像アップロード */}
+        <ImageUploader
+          onSelectImage={handleSelectImage}
+          onRemoveImage={handleRemovePreviewImage}
+          imagePreviewUrl={imagePreviewUrl}
+        />
       </div>
 
       {/* 右側のコンテンツエリア */}

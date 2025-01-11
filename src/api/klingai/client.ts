@@ -1,3 +1,6 @@
+import { API_ROUTE_ENDPOINTS } from '@/constants/endpoints'
+import { validateCreateTaskImageToVideo } from '@/lib/api/klingai_validation'
+
 import {
   CreateTaskImageToVideoRequest,
   CreateTaskImageToVideoResponse,
@@ -6,8 +9,6 @@ import {
   QueryTaskListImageToVideoRequest,
   QueryTaskListImageToVideoResponse,
 } from './types'
-import { API_ROUTE_ENDPOINTS } from '@/constants/endpoints'
-import { validateCreateTaskImageToVideo } from '@/lib/api/klingai_validation'
 
 class KlingaiClient {
   async createTaskImageToVideo(

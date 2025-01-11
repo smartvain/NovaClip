@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
-import { requestToKlingAI } from '@/lib/api/klingai'
+
 import { KLINGAI_API_ENDPOINTS } from '@/constants/endpoints'
+import { requestToKlingAI } from '@/lib/api/klingai'
 
 export async function GET(request: Request) {
   try {
