@@ -220,54 +220,74 @@ export function VideoConverter() {
       </div>
 
       <div className="flex-grow p-4 overflow-y-auto">
-        <div>
-          <h3>Prompt:</h3>
-          {prompt}
-        </div>
-        <div className="mt-4">
-          <h3>Negative Prompt:</h3>
-          {negative_prompt}
-        </div>
-        <div className="mt-4">
-          <h3>Model:</h3>
-          {model.value}
-        </div>
-        <div className="mt-4">
-          <h3>Mode:</h3>
-          {mode.value}
-        </div>
-        <div className="mt-4">
-          <h3>Duration:</h3>
-          {duration.value}
-        </div>
-        <div className="mt-4">
-          <h3>Image:</h3>
-          {imageUrl}
-        </div>
-
         {error && <div className="text-red-500 mt-4">{error}</div>}
 
         {isLoading && <div className="mt-4">動画を生成中です。しばらくお待ちください...</div>}
 
         {videoUrl && (
-          <div className="mt-4">
-            <h3 className="mb-2">生成された動画:</h3>
-            <video controls autoPlay loop className="w-full max-w-2xl">
-              <source src={videoUrl} type="video/mp4" />
-              お使いのブラウザは動画の再生に対応していません。
-            </video>
+          <div className="mt-8 bg-gray-50 rounded-lg p-6 shadow-sm">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">生成された動画</h3>
+            <div className="relative rounded-lg overflow-hidden bg-black">
+              <video controls autoPlay loop className="w-full max-w-2xl mx-auto">
+                <source src={videoUrl} type="video/mp4" />
+                お使いのブラウザは動画の再生に対応していません。
+              </video>
+            </div>
 
-            <div className="mt-2">
+            <div className="mt-4 flex justify-end">
               <a
                 href={videoUrl}
                 download="generated-video.mp4"
-                className="text-blue-500 hover:text-blue-700"
+                className="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200"
               >
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  />
+                </svg>
                 動画をダウンロード
               </a>
             </div>
           </div>
         )}
+
+        {/* デバッグ用 */}
+        <div className="border-t border-gray-200 my-4"></div>
+        <div>
+          <div>
+            <h3>Prompt:</h3>
+            <div className="ml-4">{prompt}</div>
+          </div>
+          <div className="mt-4">
+            <h3>Negative Prompt:</h3>
+            <div className="ml-4">{negative_prompt}</div>
+          </div>
+          <div className="mt-4">
+            <h3>Model:</h3>
+            <div className="ml-4">{model.value}</div>
+          </div>
+          <div className="mt-4">
+            <h3>Mode:</h3>
+            <div className="ml-4">{mode.value}</div>
+          </div>
+          <div className="mt-4">
+            <h3>Duration:</h3>
+            <div className="ml-4">{duration.value}</div>
+          </div>
+          <div className="mt-4">
+            <h3>Image:</h3>
+            <div className="ml-4">{imageUrl}</div>
+          </div>
+        </div>
       </div>
     </div>
   )
