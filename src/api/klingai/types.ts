@@ -53,12 +53,18 @@ export const VALIDATION = {
   }
 } as const
 
-export interface TaskResponse {
-  task_id: string
-  status: 'pending' | 'processing' | 'completed' | 'failed'
-  video_url?: string
-  error?: {
-    message: string
-    code: string
+// reference: https://docs.qingque.cn/d/home/eZQCQxBrX8eeImjK6Ddz5iOi5?identityId=27UO6lWLHd5#section=h.8u8yii97vg00
+export interface CreateTaskImageToVideoResponse {
+  code: number
+  message: string
+  request_id: string
+  data: {
+    task_id: string
+    task_status: 'submitted' | 'processing' | 'succeed' | 'failed'
+    task_info: {
+      external_task_id: string
+    }
+    created_at: number  // Unix timestamp in milliseconds
+    updated_at: number  // Unix timestamp in milliseconds
   }
 }
