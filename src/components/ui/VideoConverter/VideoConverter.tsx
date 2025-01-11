@@ -5,7 +5,8 @@ import { useState } from 'react'
 import { klingaiClient } from '@/api/klingai'
 import { PromptTextarea } from '@/components/ui'
 import { ImageUploader } from '@/components/ui'
-import { Button } from '@/components/ui/button'
+import { MODEL_LIST, MODE_LIST, DURATION_LIST } from '@/constants/generateVideoSettings'
+import { useSelectValue } from '@/hooks'
 import { useImageProcessor } from '@/hooks'
 
 const initialPrompt =
@@ -27,9 +28,13 @@ export function VideoConverter() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
   const [videoUrl, setVideoUrl] = useState<string>('')
+
+  // ユーザー入力項目
   const [prompt, setPrompt] = useState<string>(initialPrompt)
   const [negative_prompt, setNegativePrompt] = useState<string>(initialNegativePrompt)
-
+  const model = useSelectValue(MODEL_LIST.KLING_V1_6.value, MODEL_LIST)
+  const mode = useSelectValue(MODE_LIST.STANDARD.value, MODE_LIST)
+  const duration = useSelectValue(DURATION_LIST.SHORT.value, DURATION_LIST)
   const { processImage, imageUrl, imagePreviewUrl, setImageUrl, setImagePreviewUrl } =
     useImageProcessor()
 
@@ -52,45 +57,54 @@ export function VideoConverter() {
     if (input) input.value = ''
   }
 
-  const handleQueryTaskList = async () => {
-    try {
-      const result = await klingaiClient.queryTaskListImageToVideo()
+  // TODO: 生成済みの動画を取得する
+  // const handleQueryTaskList = async () => {
+  //   try {
+  //     const result = await klingaiClient.queryTaskListImageToVideo()
 
-      console.log(result)
-      const videoUrl = result.data[0].task_result?.videos[0].url
+  //     console.log(result)
+  //     const videoUrl = result.data[0].task_result?.videos[0].url
 
-      if (videoUrl) {
-        console.log(videoUrl)
-        setVideoUrl(videoUrl)
-      }
-    } catch (error) {
-      console.error('Error:', error)
-      setError('エラーが発生しました')
-    }
-  }
+  //     if (videoUrl) {
+  //       console.log(videoUrl)
+  //       setVideoUrl(videoUrl)
+  //     }
+  //   } catch (error) {
+  //     console.error('Error:', error)
+  //     setError('エラーが発生しました')
+  //   }
+  // }
 
   const handleGenerateVideoFromImage = async () => {
     try {
       setIsLoading(true)
-      setError(null)
-      setVideoUrl(null)
+      setError('')
+      setVideoUrl('')
 
-      const result = await klingaiClient.createTaskImageToVideo({
+      const params = {
         image: imageUrl || '',
-        model_name: 'kling-v1-6', // TODO: モデル名をユーザーが選択できるようにする
-        mode: 'std', // TODO: モードをユーザーが選択できるようにする
-        duration: '5', // TODO: ユーザーが選択できるようにする
+        model_name: model.value,
+        mode: mode.value,
+        duration: duration.value,
         prompt: prompt,
         negative_prompt: negative_prompt,
         cfg_scale: 0.5,
-      })
-      console.log(result)
+      }
+      console.log('params: ', params)
+
+      const result = await klingaiClient.createTaskImageToVideo(params)
+      console.log('result: ', result)
 
       // ポーリングで状態を確認
       const pollStatus = async () => {
-        const isComplete = await klingaiClient.queryTaskImageToVideo({
+        const queryTaskImageToVideoResponse = await klingaiClient.queryTaskImageToVideo({
           task_id: result.data.task_id,
         })
+
+        console.log('queryTaskImageToVideoResponse: ', queryTaskImageToVideoResponse)
+
+        const isComplete = queryTaskImageToVideoResponse.data.task_status === 'succeed'
+
         if (!isComplete) {
           // ５秒ごとに確認
           setTimeout(pollStatus, 5000)
@@ -101,13 +115,15 @@ export function VideoConverter() {
       console.error('Error:', error)
       setError('エラーが発生しました')
       setIsLoading(false)
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="flex">
-      <div className="w-[400px] flex-shrink-0 p-4 border-r h-screen flex flex-col">
-        <div className="flex-grow overflow-y-auto">
+    <div className="flex h-full">
+      <div className="w-[500px] flex-shrink-0 p-4 border-r flex flex-col">
+        <div className="flex-grow overflow-y-auto scrollbar-none">
           {/* ポジティブプロンプト */}
           <PromptTextarea
             label="Prompt"
@@ -130,22 +146,105 @@ export function VideoConverter() {
             onRemoveImage={handleRemovePreviewImage}
             imagePreviewUrl={imagePreviewUrl}
           />
+
+          <div className="mt-4">
+            <details className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+              <summary className="font-medium cursor-pointer">Settings</summary>
+
+              <div className="mt-4">
+                <label htmlFor="model" className="block mb-2">
+                  Model
+                </label>
+                <select
+                  id="model"
+                  value={model.value}
+                  onChange={model.onChange}
+                  className="w-full p-2 border rounded"
+                >
+                  {Object.entries(MODEL_LIST).map(([key, value]) => (
+                    <option key={key} value={value.value}>
+                      {value.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mt-4">
+                <label htmlFor="mode" className="block mb-2">
+                  Mode
+                </label>
+                <select
+                  id="mode"
+                  value={mode.value}
+                  onChange={mode.onChange}
+                  className="w-full p-2 border rounded"
+                >
+                  {Object.entries(MODE_LIST).map(([key, value]) => (
+                    <option key={key} value={value.value}>
+                      {value.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mt-4">
+                <label htmlFor="duration" className="block mb-2">
+                  Duration
+                </label>
+                <select
+                  id="duration"
+                  value={duration.value}
+                  onChange={duration.onChange}
+                  className="w-full p-2 border rounded"
+                >
+                  {Object.entries(DURATION_LIST).map(([key, value]) => (
+                    <option key={key} value={value.value}>
+                      {value.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </details>
+          </div>
         </div>
 
         <div className="mt-4">
-          <Button
+          <button
             onClick={handleGenerateVideoFromImage}
-            loading={isLoading}
-            loadingText="Generating..."
             disabled={!imageUrl || isLoading}
             className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Generate
-          </Button>
+          </button>
         </div>
       </div>
 
-      <div className="flex-grow p-4">
+      <div className="flex-grow p-4 overflow-y-auto">
+        <div>
+          <h3>Prompt:</h3>
+          {prompt}
+        </div>
+        <div className="mt-4">
+          <h3>Negative Prompt:</h3>
+          {negative_prompt}
+        </div>
+        <div className="mt-4">
+          <h3>Model:</h3>
+          {model.value}
+        </div>
+        <div className="mt-4">
+          <h3>Mode:</h3>
+          {mode.value}
+        </div>
+        <div className="mt-4">
+          <h3>Duration:</h3>
+          {duration.value}
+        </div>
+        <div className="mt-4">
+          <h3>Image:</h3>
+          {imageUrl}
+        </div>
+
         {error && <div className="text-red-500 mt-4">{error}</div>}
 
         {isLoading && <div className="mt-4">動画を生成中です。しばらくお待ちください...</div>}
