@@ -1,4 +1,4 @@
-export const API_ENDPOINTS = {
+export const API_ROUTE_ENDPOINTS = {
   IMAGE_TO_VIDEO: {
     CREATE_TASK: '/api/klingai/video/imageToVideo/createTask',
     QUERY_TASK: '/api/klingai/video/imageToVideo/queryTask',
