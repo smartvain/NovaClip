@@ -11,9 +11,6 @@ export async function POST(request: Request) {
       KLINGAI_API_ENDPOINTS.IMAGE_TO_VIDEO.CREATE_TASK,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(body),
       }
     )

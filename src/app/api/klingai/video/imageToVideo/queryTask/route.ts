@@ -16,14 +16,9 @@ export async function GET(request: Request) {
       )
     }
 
-    const endpoint = KLINGAI_API_ENDPOINTS.IMAGE_TO_VIDEO.QUERY_TASK.replace('{id}', taskId! || externalTaskId!)
+    const url = KLINGAI_API_ENDPOINTS.IMAGE_TO_VIDEO.QUERY_TASK.replace('{id}', taskId! || externalTaskId!)
 
-    const response = await requestToKlingAI(endpoint, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    })
+    const response = await requestToKlingAI(url, { method: 'GET' })
 
     const data = await response.json()
 

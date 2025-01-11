@@ -8,14 +8,14 @@ export async function GET(request: Request) {
     const pageNum = searchParams.get('pageNum')
     const pageSize = searchParams.get('pageSize')
 
-    const endpoint = `${KLINGAI_API_ENDPOINTS.IMAGE_TO_VIDEO.QUERY_TASK_LIST}?pageNum=${pageNum || '1'}&pageSize=${pageSize || '30'}`
-
-    const response = await requestToKlingAI(endpoint, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
+    const queryParams = new URLSearchParams({
+      pageNum: pageNum || '1',
+      pageSize: pageSize || '30'
     })
+
+    const url = `${KLINGAI_API_ENDPOINTS.IMAGE_TO_VIDEO.QUERY_TASK_LIST}?${queryParams.toString()}`
+
+    const response = await requestToKlingAI(url, { method: 'GET' })
 
     const data = await response.json()
 

@@ -39,6 +39,7 @@ export function requestToKlingAI(endpoint: string, options?: RequestInit) {
     ...options,
     headers: {
       ...options?.headers,
+      'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiToken}`,
     },
   })

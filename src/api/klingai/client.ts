@@ -1,6 +1,8 @@
 import {
   CreateTaskImageToVideoRequest,
   CreateTaskImageToVideoResponse,
+  QueryTaskImageToVideoRequest,
+  QueryTaskImageToVideoResponse,
   QueryTaskListImageToVideoRequest,
   QueryTaskListImageToVideoResponse
 } from './types'
@@ -21,6 +23,34 @@ class KlingaiClient {
 
     if (!response.ok) {
       throw new Error('Failed to execute createTaskImageToVideo')
+    }
+
+    return response.json()
+  }
+
+  async queryTaskImageToVideo(params: QueryTaskImageToVideoRequest): Promise<QueryTaskImageToVideoResponse> {
+    if (!params.task_id && !params.external_task_id) {
+      throw new Error('Either task_id or external_task_id is required')
+    }
+
+    const queryParams = new URLSearchParams()
+    if (params.task_id) {
+      queryParams.append('task_id', params.task_id)
+    } else if (params.external_task_id) {
+      queryParams.append('external_task_id', params.external_task_id)
+    }
+
+    const url = `${API_ENDPOINTS.IMAGE_TO_VIDEO.QUERY_TASK}?${queryParams.toString()}`
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to execute queryTaskListImageToVideo')
     }
 
     return response.json()
