@@ -56,10 +56,10 @@ class KlingaiClient {
     return response.json()
   }
 
-  async queryTaskListImageToVideo(params: QueryTaskListImageToVideoRequest): Promise<QueryTaskListImageToVideoResponse> {
+  async queryTaskListImageToVideo(params?: QueryTaskListImageToVideoRequest): Promise<QueryTaskListImageToVideoResponse> {
     const queryParams = new URLSearchParams({
-      pageNum: params.pageNum || '1',
-      pageSize: params.pageSize || '30',
+      pageNum: params?.pageNum || '1',
+      pageSize: params?.pageSize || '30',
     })
 
     const url = `${API_ENDPOINTS.IMAGE_TO_VIDEO.QUERY_TASK_LIST}?${queryParams.toString()}`
