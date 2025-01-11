@@ -16,7 +16,10 @@ export async function GET(request: Request) {
       )
     }
 
-    const url = KLINGAI_API_ENDPOINTS.IMAGE_TO_VIDEO.QUERY_TASK.replace('{id}', taskId! || externalTaskId!)
+    const url = KLINGAI_API_ENDPOINTS.IMAGE_TO_VIDEO.QUERY_TASK.replace(
+      '{id}',
+      taskId! || externalTaskId!
+    )
 
     const response = await requestToKlingAI(url, { method: 'GET' })
 
@@ -25,9 +28,6 @@ export async function GET(request: Request) {
     return NextResponse.json(data)
   } catch (error) {
     console.error('Error:', error)
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }

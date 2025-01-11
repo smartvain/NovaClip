@@ -4,13 +4,15 @@ import {
   QueryTaskImageToVideoRequest,
   QueryTaskImageToVideoResponse,
   QueryTaskListImageToVideoRequest,
-  QueryTaskListImageToVideoResponse
+  QueryTaskListImageToVideoResponse,
 } from './types'
 import { API_ROUTE_ENDPOINTS } from '@/constants/endpoints'
 import { validateCreateTaskImageToVideo } from '@/lib/api/klingai_validation'
 
 class KlingaiClient {
-  async createTaskImageToVideo(params: CreateTaskImageToVideoRequest): Promise<CreateTaskImageToVideoResponse> {
+  async createTaskImageToVideo(
+    params: CreateTaskImageToVideoRequest
+  ): Promise<CreateTaskImageToVideoResponse> {
     validateCreateTaskImageToVideo(params)
 
     const response = await fetch(API_ROUTE_ENDPOINTS.IMAGE_TO_VIDEO.CREATE_TASK, {
@@ -28,7 +30,9 @@ class KlingaiClient {
     return response.json()
   }
 
-  async queryTaskImageToVideo(params: QueryTaskImageToVideoRequest): Promise<QueryTaskImageToVideoResponse> {
+  async queryTaskImageToVideo(
+    params: QueryTaskImageToVideoRequest
+  ): Promise<QueryTaskImageToVideoResponse> {
     if (!params.task_id && !params.external_task_id) {
       throw new Error('Either task_id or external_task_id is required')
     }
@@ -56,7 +60,9 @@ class KlingaiClient {
     return response.json()
   }
 
-  async queryTaskListImageToVideo(params?: QueryTaskListImageToVideoRequest): Promise<QueryTaskListImageToVideoResponse> {
+  async queryTaskListImageToVideo(
+    params?: QueryTaskListImageToVideoRequest
+  ): Promise<QueryTaskListImageToVideoResponse> {
     const queryParams = new URLSearchParams({
       pageNum: params?.pageNum || '1',
       pageSize: params?.pageSize || '30',
