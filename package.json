@@ -10,8 +10,6 @@
     "lint:fix": "next lint --fix"
   },
   "dependencies": {
-    "@chakra-ui/react": "^3.2.5",
-    "@emotion/react": "^11.14.0",
     "axios": "^1.7.9",
     "jsonwebtoken": "^9.0.2",
     "next": "15.1.4",
