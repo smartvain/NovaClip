@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
 import { klingaiClient } from '@/api/klingai'
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button'
 import { useImageProcessor } from '@/hooks'
 import NextImage from 'next/image'
 import { useEffect, useState } from 'react'
@@ -52,9 +52,9 @@ export function VideoConverter() {
 
       const result = await klingaiClient.createTaskImageToVideo({
         image: imageUrl || '',
-        model_name: "kling-v1-6",  // TODO: モデル名をユーザーが選択できるようにする
-        mode: "std", // TODO: モードをユーザーが選択できるようにする
-        duration: "5", // TODO: ユーザーが選択できるようにする
+        model_name: 'kling-v1-6',  // TODO: モデル名をユーザーが選択できるようにする
+        mode: 'std', // TODO: モードをユーザーが選択できるようにする
+        duration: '5', // TODO: ユーザーが選択できるようにする
         prompt: prompt,
         negative_prompt: negative_prompt,
         cfg_scale: 0.5,
