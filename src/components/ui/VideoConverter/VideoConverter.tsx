@@ -66,11 +66,13 @@ export function VideoConverter() {
   }
 
   // 生成済みの動画一覧を取得
-  const handleQueryTaskList = async () => {
+  const handleQueryTaskList = async (isCache: boolean = false) => {
     try {
-      const cachedUrls = localStorage.getItem(LOCAL_STORAGE_KEY)
-      if (cachedUrls) {
-        setVideoList(JSON.parse(cachedUrls))
+      setIsLoading(true)
+
+      const cachedUrlsText = isCache ? localStorage.getItem(LOCAL_STORAGE_KEY) : null
+      if (cachedUrlsText) {
+        setVideoList(JSON.parse(cachedUrlsText))
         return
       }
 
@@ -86,6 +88,8 @@ export function VideoConverter() {
       }
     } catch (error) {
       console.error('Error:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -108,25 +112,7 @@ export function VideoConverter() {
 
       const result = await klingaiClient.createTaskImageToVideo(params)
 
-      // ポーリングで状態を確認
-      const pollStatus = async () => {
-        const queryTaskImageToVideoResponse = await klingaiClient.queryTaskImageToVideo({
-          task_id: result.data.task_id,
-        })
-
-        console.log('queryTaskImageToVideoResponse: ', queryTaskImageToVideoResponse)
-
-        const isComplete = queryTaskImageToVideoResponse.data.task_status === 'succeed'
-
-        if (!isComplete) {
-          // ５秒ごとに確認
-          setTimeout(pollStatus, 5000)
-        } else {
-          const videoUrl = queryTaskImageToVideoResponse.data.task_result?.videos?.[0].url || ''
-          setVideoUrl(videoUrl)
-        }
-      }
-      await pollStatus()
+      pollStatus(result.data.task_id)
     } catch (error) {
       console.error('Error:', error)
       setError('エラーが発生しました')
@@ -137,8 +123,41 @@ export function VideoConverter() {
     }
   }
 
+  // ポーリング処理
+  const pollStatus = async (taskId: string) => {
+    try {
+      const response = await klingaiClient.queryTaskImageToVideo({
+        task_id: taskId,
+      })
+
+      console.log('queryTaskImageToVideoResponse: ', response)
+
+      const isComplete = response.data.task_status === 'succeed'
+      const isFailed = response.data.task_status === 'failed' // エラー状態の確認を追加
+
+      if (isFailed) {
+        setError('動画の生成に失敗しました')
+        setIsLoading(false)
+        return
+      }
+
+      if (!isComplete) {
+        // ５秒後に再度確認
+        setTimeout(() => pollStatus(taskId), 5000)
+      } else {
+        const videoUrl = response.data.task_result?.videos?.[0].url || ''
+        setVideoUrl(videoUrl)
+        setIsLoading(false)
+      }
+    } catch (error) {
+      console.error('Polling error:', error)
+      setError('ポーリング中にエラーが発生しました')
+      setIsLoading(false)
+    }
+  }
+
   useEffect(() => {
-    handleQueryTaskList()
+    handleQueryTaskList(true)
   }, [])
 
   return (
@@ -243,9 +262,9 @@ export function VideoConverter() {
       <div className="flex-grow p-4 overflow-y-auto">
         {error && <div className="text-red-500 mt-4">{error}</div>}
 
-        {isLoading && <div className="mt-4">動画を生成中です。しばらくお待ちください...</div>}
-
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm h-[600px]">
+        <div
+          className={`bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm h-[600px] ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
+        >
           <div className="relative rounded-lg overflow-hidden bg-black h-full">
             {videoUrl && (
               <>
@@ -280,6 +299,30 @@ export function VideoConverter() {
                 </video>
               </>
             )}
+            {isLoading && (
+              <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                <svg
+                  className="animate-spin h-10 w-10 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -302,18 +345,43 @@ export function VideoConverter() {
           `}
         >
           <div className="p-4 w-[200px] h-full overflow-y-auto">
+            <button
+              onClick={() => handleQueryTaskList(false)}
+              disabled={isLoading}
+              className={`w-full mb-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg text-sm text-gray-700 dark:text-gray-200 flex items-center justify-center gap-2 ${isLoading ? 'cursor-not-allowed opacity-50' : ''}`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={`${isLoading ? 'animate-spin' : ''}`}
+              >
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                <path d="M16 16h5v5" />
+              </svg>
+            </button>
             {videoList.map((videoUrl, index) => (
               <div key={index} className="mb-4">
                 <video
-                  className="w-full h-auto rounded-lg cursor-pointer"
+                  className={`w-full h-auto rounded-lg ${isLoading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                   preload="metadata"
                   muted
                   playsInline
-                  onClick={() => setVideoUrl(videoUrl)}
-                  onMouseOver={(e) => e.currentTarget.play()}
+                  onClick={() => !isLoading && setVideoUrl(videoUrl)}
+                  onMouseOver={(e) => !isLoading && e.currentTarget.play()}
                   onMouseOut={(e) => {
-                    e.currentTarget.pause()
-                    e.currentTarget.currentTime = 0
+                    if (!isLoading) {
+                      e.currentTarget.pause()
+                      e.currentTarget.currentTime = 0
+                    }
                   }}
                 >
                   <source src={videoUrl} type="video/mp4" />
