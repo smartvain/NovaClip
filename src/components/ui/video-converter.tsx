@@ -2,7 +2,7 @@
 
 import { klingaiClient } from '@/api/klingai'
 import { Button } from "@/components/ui/button"
-import { useImageProcessor, useTaskProcessor } from '@/hooks'
+import { useImageProcessor } from '@/hooks'
 import NextImage from 'next/image'
 import { useEffect, useState } from 'react'
 
@@ -14,7 +14,6 @@ export function VideoConverter() {
   const [negative_prompt, setNegativePrompt] = useState<string>('')
 
   const { processImage, imageUrl, imagePreviewUrl } = useImageProcessor()
-  const { checkTaskStatus } = useTaskProcessor()
 
   // ファイル選択時の処理
   const handleSelectImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,6 +25,24 @@ export function VideoConverter() {
       alert(error)
     }
   }
+
+  const handleQueryTaskList = async () => {
+    try {
+      const result = await klingaiClient.queryTaskListImageToVideo()
+
+      console.log(result)
+      const videoUrl = result.data[0].task_result?.videos[0].url
+
+      if (videoUrl) {
+        console.log(videoUrl)
+        setVideoUrl(videoUrl)
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      setError('エラーが発生しました')
+    }
+  }
+
 
   const handleImageToVideo = async () => {
     try {
@@ -46,7 +63,7 @@ export function VideoConverter() {
 
       // ポーリングで状態を確認
       const pollStatus = async () => {
-        const isComplete = await checkTaskStatus(result.data.task_id)
+        const isComplete = await klingaiClient.queryTaskImageToVideo({ task_id: result.data.task_id })
         if (!isComplete) {
           // ５秒ごとに確認
           setTimeout(pollStatus, 5000)
@@ -81,6 +98,8 @@ export function VideoConverter() {
 
   return (
     <div>
+      <Button onClick={handleQueryTaskList}>タスク一覧を取得</Button>
+
       <div>
         <label htmlFor="prompt">Prompt</label>
         <textarea
