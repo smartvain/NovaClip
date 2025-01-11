@@ -3,7 +3,6 @@ import { requestToKlingAI } from '@/lib/api/klingai'
 import { KLINGAI_API_ENDPOINTS } from '@/constants/endpoints'
 
 export async function POST(request: Request) {
-  return NextResponse.json({ message: 'Hello, World!' })
   try {
     const body = await request.json()
 
