@@ -1,13 +1,13 @@
 'use client'
 
-import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
-import {
-  ColorModeProvider,
-  type ColorModeProviderProps,
-} from './color-mode'
+import { ThemeProvider } from 'next-themes'
 import { useEffect, useState } from 'react'
 
-export function Provider(props: ColorModeProviderProps) {
+type ProviderProps = {
+  children: React.ReactNode
+}
+
+export function Provider({ children }: ProviderProps) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -17,8 +17,15 @@ export function Provider(props: ColorModeProviderProps) {
   if (!mounted) return null
 
   return (
-    <ChakraProvider value={defaultSystem}>
-      <ColorModeProvider {...props} />
-    </ChakraProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem={true}
+      disableTransitionOnChange
+      forcedTheme={undefined} // システムのカラーモードを強制的に上書きしない
+      themes={['light', 'dark', 'system']} // 利用可能なテーマを明示的に指定
+    >
+      {children}
+    </ThemeProvider>
   )
 }
