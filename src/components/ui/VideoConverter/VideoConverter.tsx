@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useImageProcessor } from '@/hooks'
 import NextImage from 'next/image'
 import { useEffect, useState } from 'react'
+import { PromptTextarea } from '@/components/ui'
 
 export function VideoConverter() {
   const [isLoading, setIsLoading] = useState(false)
@@ -112,29 +113,19 @@ export function VideoConverter() {
     <div className="flex">
       {/* 左側のフォームエリア */}
       <div className="w-[400px] flex-shrink-0 p-4 border-r h-screen overflow-y-auto">
-        <div>
-          <label htmlFor="prompt" className="block mb-2">
-            Prompt
-          </label>
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Enter your prompt here..."
-            className="w-full min-h-[150px] p-2 mb-4 border rounded"
-          />
-        </div>
+        <PromptTextarea
+          label="Prompt"
+          value={prompt}
+          onChange={setPrompt}
+          placeholder="Enter your prompt here..."
+        />
 
-        <div>
-          <label htmlFor="negative_prompt" className="block mb-2">
-            Negative Prompt
-          </label>
-          <textarea
-            value={negative_prompt}
-            onChange={(e) => setNegativePrompt(e.target.value)}
-            placeholder="Enter your negative prompt here..."
-            className="w-full min-h-[150px] p-2 mb-4 border rounded"
-          />
-        </div>
+        <PromptTextarea
+          label="Negative Prompt"
+          value={negative_prompt}
+          onChange={setNegativePrompt}
+          placeholder="Enter your negative prompt here..."
+        />
 
         <div>
           <input
