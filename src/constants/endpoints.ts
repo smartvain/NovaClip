@@ -10,6 +10,6 @@ export const KLINGAI_API_ENDPOINTS = {
   IMAGE_TO_VIDEO: {
     CREATE_TASK: '/v1/videos/image2video',
     QUERY_TASK: '/v1/videos/image2video/{id}', // {id}は呼び出し元でtask_idまたはexternal_task_idに置き換える
-    QUERY_TASK_LIST: '/v1/videos/image2videottttt',
+    QUERY_TASK_LIST: '/v1/videos/image2video',
   },
 } as const
