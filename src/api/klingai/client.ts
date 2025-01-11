@@ -1,10 +1,10 @@
-import { CreateTaskParams, CreateTaskImageToVideoResponse } from './types'
+import { CreateTaskImageToVideoRequest, CreateTaskImageToVideoResponse } from './types'
 import { API_ENDPOINTS } from '@/constants/endpoints'
-import { validateCreateTaskParams } from '@/lib/api/klingai_validation'
+import { validateCreateTaskImageToVideo } from '@/lib/api/klingai_validation'
 
 class KlingaiClient {
-  async createTaskImageToVideo(params: CreateTaskParams): Promise<CreateTaskImageToVideoResponse> {
-    validateCreateTaskParams(params)
+  async createTaskImageToVideo(params: CreateTaskImageToVideoRequest): Promise<CreateTaskImageToVideoResponse> {
+    validateCreateTaskImageToVideo(params)
 
     const response = await fetch(API_ENDPOINTS.IMAGE_TO_VIDEO.CREATE_TASK, {
       method: 'POST',

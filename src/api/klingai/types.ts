@@ -19,39 +19,27 @@ type VideoMode = 'std' | 'pro';
 // 動画の長さの列挙型
 type Duration = '5' | '10';
 
-export interface CreateTaskParams {
+export interface CreateTaskImageToVideoRequest {
   // 必須フィールド
-  image: string;  // Base64文字列またはURL
+  image: string;  // Base64文字列またはURL（例: https://example.com/image.jpg）
 
-  // オプションフィールド
-  model_name?: ModelName;
-  image_tail?: string;
-  prompt?: string;
+  // オプションフィールド（推奨設定項目）
+  model_name?: ModelName;  // デフォルト: 'kling-v1'
+  mode?: VideoMode;        // デフォルト: 'std'
+  duration?: Duration;     // デフォルト: '5'
+  prompt?: string;         // 動画生成時の指示テキスト
+  cfg_scale?: number;      // 0から1の範囲。プロンプトの影響度
+
+  // マスク関連（オプション）
+  static_mask?: string;    // 静的マスクのURL
+  dynamic_masks?: DynamicMask[];  // 動的マスクの配列
+
+  // その他のオプション
+  image_tail?: string;     // 最終フレームの画像URL
   negative_prompt?: string;
-  cfg_scale?: number;  // 0から1の範囲
-  mode?: VideoMode;
-  static_mask?: string;
-  dynamic_masks?: DynamicMask[];
-  duration?: Duration;
-  callback_url?: string;
-  external_task_id?: string;
+  callback_url?: string;   // 処理完了時のコールバックURL
+  external_task_id?: string;  // 外部システムでの識別用ID
 }
-
-// バリデーション用の定数
-export const VALIDATION = {
-  MAX_PROMPT_LENGTH: 2500,
-  MAX_DYNAMIC_MASKS: 6,
-  MAX_TRAJECTORY_POINTS: 77,
-  MIN_TRAJECTORY_POINTS: 2,
-  MAX_IMAGE_SIZE: 10 * 1024 * 1024, // 10MB
-  MIN_IMAGE_RESOLUTION: 300, // 300x300px
-  MAX_ASPECT_RATIO: 2.5,
-  MIN_ASPECT_RATIO: 1 / 2.5,
-  CFG_SCALE: {
-    MIN: 0,
-    MAX: 1
-  }
-} as const
 
 // reference: https://docs.qingque.cn/d/home/eZQCQxBrX8eeImjK6Ddz5iOi5?identityId=27UO6lWLHd5#section=h.8u8yii97vg00
 export interface CreateTaskImageToVideoResponse {

@@ -1,6 +1,21 @@
-import { CreateTaskParams, VALIDATION } from "@/api/klingai/types"
+import { CreateTaskImageToVideoRequest } from "@/api/klingai/types"
 
-export const validateCreateTaskParams = (params: CreateTaskParams) => {
+export const VALIDATION = {
+  MAX_PROMPT_LENGTH: 2500,
+  MAX_DYNAMIC_MASKS: 6,
+  MAX_TRAJECTORY_POINTS: 77,
+  MIN_TRAJECTORY_POINTS: 2,
+  MAX_IMAGE_SIZE: 10 * 1024 * 1024, // 10MB
+  MIN_IMAGE_RESOLUTION: 300, // 300x300px
+  MAX_ASPECT_RATIO: 2.5,
+  MIN_ASPECT_RATIO: 1 / 2.5,
+  CFG_SCALE: {
+    MIN: 0,
+    MAX: 1
+  }
+} as const
+
+export const validateCreateTaskImageToVideo = (params: CreateTaskImageToVideoRequest) => {
   // プロンプトの長さチェック
   if (params.prompt && params.prompt.length > VALIDATION.MAX_PROMPT_LENGTH) {
     throw new Error(`Prompt length exceeds ${VALIDATION.MAX_PROMPT_LENGTH} characters`)
