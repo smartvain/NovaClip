@@ -19,7 +19,7 @@ export default function RootLayout({
       <body>
         <Provider>
           <Header />
-          <main className="mt-16">{children}</main>
+          <main className="mt-16 h-[calc(100vh-4rem)]">{children}</main>
         </Provider>
       </body>
     </html>
