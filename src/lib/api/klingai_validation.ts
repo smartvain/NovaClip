@@ -11,8 +11,8 @@ export const VALIDATION = {
   MIN_ASPECT_RATIO: 1 / 2.5,
   CFG_SCALE: {
     MIN: 0,
-    MAX: 1
-  }
+    MAX: 1,
+  },
 } as const
 
 export const validateCreateTaskImageToVideo = (params: CreateTaskImageToVideoRequest) => {
@@ -30,17 +30,25 @@ export const validateCreateTaskImageToVideo = (params: CreateTaskImageToVideoReq
       throw new Error(`Maximum ${VALIDATION.MAX_DYNAMIC_MASKS} dynamic masks allowed`)
     }
 
-    params.dynamic_masks.forEach(mask => {
-      if (mask.trajectories.length < VALIDATION.MIN_TRAJECTORY_POINTS ||
-        mask.trajectories.length > VALIDATION.MAX_TRAJECTORY_POINTS) {
-        throw new Error(`Trajectory points must be between ${VALIDATION.MIN_TRAJECTORY_POINTS} and ${VALIDATION.MAX_TRAJECTORY_POINTS}`)
+    params.dynamic_masks.forEach((mask) => {
+      if (
+        mask.trajectories.length < VALIDATION.MIN_TRAJECTORY_POINTS ||
+        mask.trajectories.length > VALIDATION.MAX_TRAJECTORY_POINTS
+      ) {
+        throw new Error(
+          `Trajectory points must be between ${VALIDATION.MIN_TRAJECTORY_POINTS} and ${VALIDATION.MAX_TRAJECTORY_POINTS}`
+        )
       }
     })
   }
 
   // cfg_scaleのバリデーション
-  if (params.cfg_scale !== undefined &&
-    (params.cfg_scale < VALIDATION.CFG_SCALE.MIN || params.cfg_scale > VALIDATION.CFG_SCALE.MAX)) {
-    throw new Error(`cfg_scale must be between ${VALIDATION.CFG_SCALE.MIN} and ${VALIDATION.CFG_SCALE.MAX}`)
+  if (
+    params.cfg_scale !== undefined &&
+    (params.cfg_scale < VALIDATION.CFG_SCALE.MIN || params.cfg_scale > VALIDATION.CFG_SCALE.MAX)
+  ) {
+    throw new Error(
+      `cfg_scale must be between ${VALIDATION.CFG_SCALE.MIN} and ${VALIDATION.CFG_SCALE.MAX}`
+    )
   }
 }

@@ -13,23 +13,30 @@ const eslintConfig = [
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
     rules: {
-      'semi': ['error', 'never'],  // セミコロンを禁止
-      'semi-spacing': ['error', { 'before': false, 'after': true }],
-      'quotes': ['error', 'single', {
-        'avoidEscape': true,
-        'allowTemplateLiterals': true
-      }],
-      'max-len': ['error', {
-        code: 100,
-        tabWidth: 2,
-        ignoreUrls: true,
-        ignoreStrings: false,
-        ignoreTemplateLiterals: false,
-        ignoreRegExpLiterals: true,
-        ignoreComments: false
-      }]
-    }
-  }
+      semi: ['error', 'never'], // セミコロンを禁止
+      'semi-spacing': ['error', { before: false, after: true }],
+      quotes: [
+        'error',
+        'single',
+        {
+          avoidEscape: true,
+          allowTemplateLiterals: true,
+        },
+      ],
+      'max-len': [
+        'error',
+        {
+          code: 100,
+          tabWidth: 2,
+          ignoreUrls: true,
+          ignoreStrings: true,
+          ignoreTemplateLiterals: true,
+          ignoreRegExpLiterals: true,
+          ignoreComments: false,
+        },
+      ],
+    },
+  },
 ]
 
 export default eslintConfig
