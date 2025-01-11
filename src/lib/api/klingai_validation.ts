@@ -1,4 +1,4 @@
-import { CreateTaskImageToVideoRequest } from "@/api/klingai/types"
+import { CreateTaskImageToVideoRequest } from '@/api/klingai/types'
 
 export const VALIDATION = {
   MAX_PROMPT_LENGTH: 2500,

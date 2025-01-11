@@ -1,11 +1,11 @@
-"use client"
+'use client'
 
-import { ChakraProvider, defaultSystem } from "@chakra-ui/react"
+import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import {
   ColorModeProvider,
   type ColorModeProviderProps,
-} from "./color-mode"
-import { useEffect, useState } from "react"
+} from './color-mode'
+import { useEffect, useState } from 'react'
 
 export function Provider(props: ColorModeProviderProps) {
   const [mounted, setMounted] = useState(false)

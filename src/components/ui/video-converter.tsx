@@ -43,7 +43,6 @@ export function VideoConverter() {
     }
   }
 
-
   const handleImageToVideo = async () => {
     try {
       setIsLoading(true)
@@ -52,7 +51,7 @@ export function VideoConverter() {
 
       const result = await klingaiClient.createTaskImageToVideo({
         image: imageUrl || '',
-        model_name: 'kling-v1-6',  // TODO: モデル名をユーザーが選択できるようにする
+        model_name: 'kling-v1-6', // TODO: モデル名をユーザーが選択できるようにする
         mode: 'std', // TODO: モードをユーザーが選択できるようにする
         duration: '5', // TODO: ユーザーが選択できるようにする
         prompt: prompt,
@@ -63,7 +62,9 @@ export function VideoConverter() {
 
       // ポーリングで状態を確認
       const pollStatus = async () => {
-        const isComplete = await klingaiClient.queryTaskImageToVideo({ task_id: result.data.task_id })
+        const isComplete = await klingaiClient.queryTaskImageToVideo({
+          task_id: result.data.task_id,
+        })
         if (!isComplete) {
           // ５秒ごとに確認
           setTimeout(pollStatus, 5000)
@@ -77,7 +78,8 @@ export function VideoConverter() {
     }
   }
 
-  const initialPrompt = 'dancing, Create a natural, fluid animation with subtle human-like movements:' +
+  const initialPrompt =
+    'dancing, Create a natural, fluid animation with subtle human-like movements:' +
     '- Maintain gentle, organic motion' +
     '- Add slight breathing movement' +
     '- Include minimal head tilt and micro-expressions' +
@@ -89,7 +91,8 @@ export function VideoConverter() {
     setPrompt(initialPrompt)
   }, [])
 
-  const initialNegativePrompt = 'nsfw, lowres, (worst quality, bad quality:1.2), bad anatomy, sketch, ' +
+  const initialNegativePrompt =
+    'nsfw, lowres, (worst quality, bad quality:1.2), bad anatomy, sketch, ' +
     'jpeg artifacts, signature, watermark, old, oldest, censored, bar_censor, ' +
     '(pregnant), chibi, loli, simple background'
   useEffect(() => {
@@ -110,7 +113,7 @@ export function VideoConverter() {
             width: '100%',
             minHeight: '100px',
             padding: '8px',
-            marginBottom: '16px'
+            marginBottom: '16px',
           }}
         />
       </div>
@@ -125,7 +128,7 @@ export function VideoConverter() {
             width: '100%',
             minHeight: '100px',
             padding: '8px',
-            marginBottom: '16px'
+            marginBottom: '16px',
           }}
         />
       </div>
@@ -140,7 +143,7 @@ export function VideoConverter() {
           style={{
             width: '100%',
             padding: '8px',
-            marginBottom: '16px'
+            marginBottom: '16px',
           }}
         />
         {imagePreviewUrl && (
@@ -152,7 +155,7 @@ export function VideoConverter() {
             style={{
               maxWidth: '100%',
               height: 'auto',
-              marginBottom: '16px'
+              marginBottom: '16px',
             }}
           />
         )}
@@ -167,27 +170,14 @@ export function VideoConverter() {
         動画を生成
       </Button>
 
-      {error && (
-        <div className="text-red-500 mt-4">
-          {error}
-        </div>
-      )}
+      {error && <div className="text-red-500 mt-4">{error}</div>}
 
-      {isLoading && (
-        <div className="mt-4">
-          動画を生成中です。しばらくお待ちください...
-        </div>
-      )}
+      {isLoading && <div className="mt-4">動画を生成中です。しばらくお待ちください...</div>}
 
       {videoUrl && (
         <div className="mt-4">
           <h3 className="mb-2">生成された動画:</h3>
-          <video
-            controls
-            autoPlay
-            loop
-            className="w-full max-w-2xl"
-          >
+          <video controls autoPlay loop className="w-full max-w-2xl">
             <source src={videoUrl} type="video/mp4" />
             お使いのブラウザは動画の再生に対応していません。
           </video>
