@@ -4,7 +4,8 @@ const API_BASE_URL = process.env.KLINGAI_API_BASE_URL!
 const ACCESS_KEY_ID = process.env.KLINGAI_ACCESS_KEY_ID!
 const ACCESS_KEY_SECRET = process.env.KLINGAI_ACCESS_KEY_SECRET!
 
-export function generateApiToken() {
+// reference: https://docs.qingque.cn/d/home/eZQCQxBrX8eeImjK6Ddz5iOi5?identityId=27UO6lWLHd5#section=h.4n2igymyyolq
+export function generateJwtToken() {
   const header = {
     alg: 'HS256',
     typ: 'JWT'
@@ -19,12 +20,6 @@ export function generateApiToken() {
   }
 
   try {
-    // デバッグ用のログ出力
-    console.log('Generating token with:', {
-      accessKeyId: ACCESS_KEY_ID,
-      payload
-    })
-
     const token = jwt.sign(payload, ACCESS_KEY_SECRET, {
       algorithm: 'HS256',
       header
@@ -32,15 +27,15 @@ export function generateApiToken() {
 
     return token
   } catch (error) {
-    console.error('Token generation error:', error)
+    console.error('JwtToken generation error:', error)
     throw error
   }
 }
 
-export function customFetch(url: string, options?: RequestInit) {
-  const apiToken = generateApiToken()
+export function requestToKlingAI(endpoint: string, options?: RequestInit) {
+  const apiToken = generateJwtToken()
 
-  return fetch(`${API_BASE_URL}${url}`, {
+  return fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers: {
       ...options?.headers,

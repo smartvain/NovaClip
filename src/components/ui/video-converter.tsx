@@ -50,7 +50,7 @@ export function VideoConverter() {
       actions.setError(null)
       actions.setVideoUrl(null)
 
-      const result = await klingaiClient.createImageToVideoTask({
+      const result = await klingaiClient.createTaskImageToVideo({
         image: imageUrl || '',
         model_name: "kling-v1-6",
         mode: "std",
@@ -125,10 +125,13 @@ export function VideoConverter() {
         />
         {imagePreviewUrl && (
           <NextImage
-            src={imagePreviewUrl} // プレビュー用にはフルのData URLを使用
+            src={imagePreviewUrl}
             alt="Preview"
+            width={500}
+            height={300}
             style={{
               maxWidth: '100%',
+              height: 'auto',
               marginBottom: '16px'
             }}
           />

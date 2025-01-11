@@ -1,9 +1,6 @@
 import { CreateTaskParams, TaskResponse } from './types'
 import { VALIDATION } from './types'
-
-const API_BASE_URL = 'https://api.klingai.com/v1'
-const API_KEY = process.env.NEXT_PUBLIC_KLINGAI_API_KEY
-
+import { API_ENDPOINTS } from '@/constants/endpoints'
 class KlingaiClient {
   private validateCreateTaskParams(params: CreateTaskParams) {
     // プロンプトの長さチェック
@@ -35,27 +32,10 @@ class KlingaiClient {
     }
   }
 
-  private async fetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`,
-        ...options?.headers,
-      },
-    })
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`)
-    }
-
-    return response.json()
-  }
-
-  async createImageToVideoTask(params: CreateTaskParams): Promise<TaskResponse> {
+  async createTaskImageToVideo(params: CreateTaskParams): Promise<TaskResponse> {
     this.validateCreateTaskParams(params)
 
-    const response = await fetch('/api/klingai', {
+    const response = await fetch(API_ENDPOINTS.IMAGE_TO_VIDEO.CREATE_TASK, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -64,7 +44,7 @@ class KlingaiClient {
     })
 
     if (!response.ok) {
-      throw new Error('Failed to create task')
+      throw new Error('Failed to execute createTaskImageToVideo')
     }
 
     return response.json()
