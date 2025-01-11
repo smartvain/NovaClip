@@ -5,4 +5,5 @@ export interface ImageUploadProps {
   onRemoveImage: () => void
   imagePreviewUrl: string | null
   acceptTypes?: string
+  className?: string
 }

@@ -7,15 +7,16 @@ export function ImageUploader({
   onRemoveImage,
   imagePreviewUrl,
   acceptTypes = 'image/jpeg,image/jpg,image/png',
+  className,
 }: ImageUploadProps) {
   return (
-    <div>
+    <div className={className}>
       <input
         type="file"
         id="image"
         accept={acceptTypes}
         onChange={onSelectImage}
-        className="w-full p-2 mb-4"
+        className={`w-full p-2 ${imagePreviewUrl ? 'mb-4' : ''}`}
       />
       {imagePreviewUrl && (
         <div className="relative">
@@ -24,7 +25,7 @@ export function ImageUploader({
             alt="Preview"
             width={500}
             height={400}
-            className="w-full h-[400px] object-contain mb-4"
+            className="w-full h-[400px] object-contain"
           />
           <button
             onClick={onRemoveImage}

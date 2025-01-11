@@ -69,7 +69,7 @@ export function VideoConverter() {
     }
   }
 
-  const handleImageToVideo = async () => {
+  const handleGenerateVideoFromImage = async () => {
     try {
       setIsLoading(true)
       setError(null)
@@ -106,40 +106,46 @@ export function VideoConverter() {
 
   return (
     <div className="flex">
-      <div className="w-[400px] flex-shrink-0 p-4 border-r h-screen overflow-y-auto">
-        {/* ポジティブプロンプト */}
-        <PromptTextarea
-          label="Prompt"
-          value={prompt}
-          onChange={setPrompt}
-          placeholder="Enter your prompt here..."
-        />
-        {/* ネガティブプロンプト */}
-        <PromptTextarea
-          label="Negative Prompt"
-          value={negative_prompt}
-          onChange={setNegativePrompt}
-          placeholder="Enter your negative prompt here..."
-        />
-        {/* 画像アップロード */}
-        <ImageUploader
-          onSelectImage={handleSelectImage}
-          onRemoveImage={handleRemovePreviewImage}
-          imagePreviewUrl={imagePreviewUrl}
-        />
+      <div className="w-[400px] flex-shrink-0 p-4 border-r h-screen flex flex-col">
+        <div className="flex-grow overflow-y-auto">
+          {/* ポジティブプロンプト */}
+          <PromptTextarea
+            label="Prompt"
+            value={prompt}
+            onChange={setPrompt}
+            placeholder="Enter your prompt here..."
+          />
+          {/* ネガティブプロンプト */}
+          <PromptTextarea
+            className="mt-4"
+            label="Negative Prompt"
+            value={negative_prompt}
+            onChange={setNegativePrompt}
+            placeholder="Enter your negative prompt here..."
+          />
+          {/* 画像アップロード */}
+          <ImageUploader
+            className="mt-4"
+            onSelectImage={handleSelectImage}
+            onRemoveImage={handleRemovePreviewImage}
+            imagePreviewUrl={imagePreviewUrl}
+          />
+        </div>
+
+        <div className="mt-4">
+          <Button
+            onClick={handleGenerateVideoFromImage}
+            loading={isLoading}
+            loadingText="Generating..."
+            disabled={!imageUrl || isLoading}
+            className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Generate
+          </Button>
+        </div>
       </div>
 
-      {/* 右側のコンテンツエリア */}
       <div className="flex-grow p-4">
-        <Button
-          onClick={handleImageToVideo}
-          loading={isLoading}
-          loadingText="生成中..."
-          disabled={!imageUrl || isLoading}
-        >
-          動画を生成
-        </Button>
-
         {error && <div className="text-red-500 mt-4">{error}</div>}
 
         {isLoading && <div className="mt-4">動画を生成中です。しばらくお待ちください...</div>}

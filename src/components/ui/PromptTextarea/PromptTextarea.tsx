@@ -1,8 +1,14 @@
 import { PromptTextareaProps } from './types'
 
-export function PromptTextarea({ label, value, onChange, placeholder }: PromptTextareaProps) {
+export function PromptTextarea({
+  label,
+  value,
+  onChange,
+  placeholder,
+  className,
+}: PromptTextareaProps) {
   return (
-    <div>
+    <div className={className}>
       <label htmlFor={label} className="block mb-2">
         {label}
       </label>
@@ -10,7 +16,7 @@ export function PromptTextarea({ label, value, onChange, placeholder }: PromptTe
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full min-h-[150px] p-2 mb-4 border rounded"
+        className="w-full min-h-[150px] p-2 border rounded"
       />
     </div>
   )
