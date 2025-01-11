@@ -13,7 +13,8 @@ export function VideoConverter() {
   const [prompt, setPrompt] = useState<string>('')
   const [negative_prompt, setNegativePrompt] = useState<string>('')
 
-  const { processImage, imageUrl, imagePreviewUrl } = useImageProcessor()
+  const { processImage, imageUrl, imagePreviewUrl, setImageUrl, setImagePreviewUrl } =
+    useImageProcessor()
 
   // ファイル選択時の処理
   const handleSelectImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,6 +25,14 @@ export function VideoConverter() {
     if (!isValid && error) {
       alert(error)
     }
+  }
+
+  const handleRemovePreviewImage = () => {
+    setImageUrl(null)
+    setImagePreviewUrl(null)
+    // ファイル選択をクリア
+    const input = document.getElementById('image') as HTMLInputElement
+    if (input) input.value = ''
   }
 
   const handleQueryTaskList = async () => {
@@ -100,99 +109,97 @@ export function VideoConverter() {
   }, [])
 
   return (
-    <div>
-      <Button onClick={handleQueryTaskList}>タスク一覧を取得</Button>
-
-      <div>
-        <label htmlFor="prompt">Prompt</label>
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Enter your prompt here..."
-          style={{
-            width: '100%',
-            minHeight: '100px',
-            padding: '8px',
-            marginBottom: '16px',
-          }}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="negative_prompt">Negative Prompt</label>
-        <textarea
-          value={negative_prompt}
-          onChange={(e) => setNegativePrompt(e.target.value)}
-          placeholder="Enter your negative prompt here..."
-          style={{
-            width: '100%',
-            minHeight: '100px',
-            padding: '8px',
-            marginBottom: '16px',
-          }}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="image">Image Upload</label>
-        <input
-          type="file"
-          id="image"
-          accept="image/jpeg,image/jpg,image/png"
-          onChange={handleSelectImage}
-          style={{
-            width: '100%',
-            padding: '8px',
-            marginBottom: '16px',
-          }}
-        />
-        {imagePreviewUrl && (
-          <NextImage
-            src={imagePreviewUrl}
-            alt="Preview"
-            width={500}
-            height={300}
-            style={{
-              maxWidth: '100%',
-              height: 'auto',
-              marginBottom: '16px',
-            }}
+    <div className="flex">
+      {/* 左側のフォームエリア */}
+      <div className="w-[400px] flex-shrink-0 p-4 border-r h-screen overflow-y-auto">
+        <div>
+          <label htmlFor="prompt" className="block mb-2">
+            Prompt
+          </label>
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Enter your prompt here..."
+            className="w-full min-h-[150px] p-2 mb-4 border rounded"
           />
+        </div>
+
+        <div>
+          <label htmlFor="negative_prompt" className="block mb-2">
+            Negative Prompt
+          </label>
+          <textarea
+            value={negative_prompt}
+            onChange={(e) => setNegativePrompt(e.target.value)}
+            placeholder="Enter your negative prompt here..."
+            className="w-full min-h-[150px] p-2 mb-4 border rounded"
+          />
+        </div>
+
+        <div>
+          <input
+            type="file"
+            id="image"
+            accept="image/jpeg,image/jpg,image/png"
+            onChange={handleSelectImage}
+            className="w-full p-2 mb-4"
+          />
+          {imagePreviewUrl && (
+            <div className="relative">
+              <NextImage
+                src={imagePreviewUrl}
+                alt="Preview"
+                width={500}
+                height={400}
+                className="w-full h-[400px] object-contain mb-4"
+              />
+              <button
+                onClick={handleRemovePreviewImage}
+                className="absolute top-2 right-2 bg-gray-600 text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-700"
+                aria-label="画像を削除"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 右側のコンテンツエリア */}
+      <div className="flex-grow p-4">
+        <Button
+          onClick={handleImageToVideo}
+          loading={isLoading}
+          loadingText="生成中..."
+          disabled={!imageUrl || isLoading}
+        >
+          動画を生成
+        </Button>
+
+        {error && <div className="text-red-500 mt-4">{error}</div>}
+
+        {isLoading && <div className="mt-4">動画を生成中です。しばらくお待ちください...</div>}
+
+        {videoUrl && (
+          <div className="mt-4">
+            <h3 className="mb-2">生成された動画:</h3>
+            <video controls autoPlay loop className="w-full max-w-2xl">
+              <source src={videoUrl} type="video/mp4" />
+              お使いのブラウザは動画の再生に対応していません。
+            </video>
+
+            <div className="mt-2">
+              <a
+                href={videoUrl}
+                download="generated-video.mp4"
+                className="text-blue-500 hover:text-blue-700"
+              >
+                動画をダウンロード
+              </a>
+            </div>
+          </div>
         )}
       </div>
-
-      <Button
-        onClick={handleImageToVideo}
-        loading={isLoading}
-        loadingText="生成中..."
-        disabled={!imageUrl || isLoading}
-      >
-        動画を生成
-      </Button>
-
-      {error && <div className="text-red-500 mt-4">{error}</div>}
-
-      {isLoading && <div className="mt-4">動画を生成中です。しばらくお待ちください...</div>}
-
-      {videoUrl && (
-        <div className="mt-4">
-          <h3 className="mb-2">生成された動画:</h3>
-          <video controls autoPlay loop className="w-full max-w-2xl">
-            <source src={videoUrl} type="video/mp4" />
-            お使いのブラウザは動画の再生に対応していません。
-          </video>
-
-          <div className="mt-2">
-            <a
-              href={videoUrl}
-              download="generated-video.mp4"
-              className="text-blue-500 hover:text-blue-700"
-            >
-              動画をダウンロード
-            </a>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

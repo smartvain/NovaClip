@@ -6,11 +6,13 @@ interface ImageValidationRules {
   aspectRatioRange: { min: number; max: number }
 }
 
-export const useImageProcessor = (validationRules: ImageValidationRules = {
-  minDimensions: { width: 300, height: 300 },
-  maxFileSize: 10 * 1024 * 1024, // 10MB
-  aspectRatioRange: { min: 1 / 2.5, max: 2.5 }
-}) => {
+export const useImageProcessor = (
+  validationRules: ImageValidationRules = {
+    minDimensions: { width: 300, height: 300 },
+    maxFileSize: 10 * 1024 * 1024, // 10MB
+    aspectRatioRange: { min: 1 / 2.5, max: 2.5 },
+  }
+) => {
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
 
@@ -19,10 +21,12 @@ export const useImageProcessor = (validationRules: ImageValidationRules = {
     return new Promise((resolve) => {
       const img = new Image()
       img.onload = () => {
-        const isValidResolution = img.width >= validationRules.minDimensions.width &&
+        const isValidResolution =
+          img.width >= validationRules.minDimensions.width &&
           img.height >= validationRules.minDimensions.height
         const aspectRatio = img.width / img.height
-        const isValidAspectRatio = aspectRatio >= validationRules.aspectRatioRange.min &&
+        const isValidAspectRatio =
+          aspectRatio >= validationRules.aspectRatioRange.min &&
           aspectRatio <= validationRules.aspectRatioRange.max
         const isValidSize = file.size <= validationRules.maxFileSize
 
@@ -47,7 +51,8 @@ export const useImageProcessor = (validationRules: ImageValidationRules = {
     if (!isValid) {
       return {
         isValid: false,
-        error: '画像は300x300px以上、アスペクト比1:2.5〜2.5:1の範囲内、10MB以下である必要があります。'
+        error:
+          '画像は300x300px以上、アスペクト比1:2.5〜2.5:1の範囲内、10MB以下である必要があります。',
       }
     }
 
@@ -67,6 +72,8 @@ export const useImageProcessor = (validationRules: ImageValidationRules = {
   return {
     imagePreviewUrl,
     imageUrl,
-    processImage
+    setImagePreviewUrl,
+    setImageUrl,
+    processImage,
   }
 }
