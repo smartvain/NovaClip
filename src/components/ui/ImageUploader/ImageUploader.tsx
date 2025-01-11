@@ -13,7 +13,7 @@ export function ImageUploader({
     <div className={className}>
       <label
         htmlFor="image"
-        className="relative flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 overflow-hidden"
+        className="relative flex flex-col items-center justify-center w-full h-80 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 overflow-hidden"
       >
         {imagePreviewUrl ? (
           <>
