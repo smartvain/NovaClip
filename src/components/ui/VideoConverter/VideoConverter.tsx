@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { klingaiClient } from '@/api/klingai'
-import { PromptTextarea } from '@/components/ui'
-import { ImageUploader } from '@/components/ui'
+import { PromptTextarea, ImageUploader, SelectField } from '@/components/ui'
 import { MODEL_LIST, MODE_LIST, DURATION_LIST } from '@/constants/generateVideoSettings'
 import { useSelectValue } from '@/hooks'
 import { useImageProcessor } from '@/hooks'
@@ -191,59 +190,32 @@ export function VideoConverter() {
             <details className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
               <summary className="font-medium cursor-pointer">Settings</summary>
 
-              <div className="mt-4">
-                <label htmlFor="model" className="block mb-2">
-                  Model
-                </label>
-                <select
-                  id="model"
-                  value={model.value}
-                  onChange={model.onChange}
-                  className="w-full p-2 border rounded"
-                >
-                  {Object.entries(MODEL_LIST).map(([key, value]) => (
-                    <option key={key} value={value.value}>
-                      {value.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <SelectField
+                id="model"
+                label="Model"
+                value={model.value}
+                onChange={model.onChange}
+                options={MODEL_LIST}
+                className="mt-4"
+              />
 
-              <div className="mt-4">
-                <label htmlFor="mode" className="block mb-2">
-                  Mode
-                </label>
-                <select
-                  id="mode"
-                  value={mode.value}
-                  onChange={mode.onChange}
-                  className="w-full p-2 border rounded"
-                >
-                  {Object.entries(MODE_LIST).map(([key, value]) => (
-                    <option key={key} value={value.value}>
-                      {value.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <SelectField
+                id="mode"
+                label="Mode"
+                value={mode.value}
+                onChange={mode.onChange}
+                options={MODE_LIST}
+                className="mt-4"
+              />
 
-              <div className="mt-4">
-                <label htmlFor="duration" className="block mb-2">
-                  Duration
-                </label>
-                <select
-                  id="duration"
-                  value={duration.value}
-                  onChange={duration.onChange}
-                  className="w-full p-2 border rounded"
-                >
-                  {Object.entries(DURATION_LIST).map(([key, value]) => (
-                    <option key={key} value={value.value}>
-                      {value.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <SelectField
+                id="duration"
+                label="Duration"
+                value={duration.value}
+                onChange={duration.onChange}
+                options={DURATION_LIST}
+                className="mt-4"
+              />
             </details>
           </div>
         </div>
@@ -260,8 +232,6 @@ export function VideoConverter() {
       </div>
 
       <div className="flex-grow p-4 overflow-y-auto">
-        {error && <div className="text-red-500 mt-4">{error}</div>}
-
         <div
           className={`bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm h-[600px] ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
         >
