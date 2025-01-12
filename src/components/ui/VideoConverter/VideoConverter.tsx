@@ -93,12 +93,12 @@ export function VideoConverter() {
         setVideoList(videoUrls)
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(videoUrls))
       }
+      showToast('Video list updated successfully', 'info')
     } catch (error) {
       console.error(error)
+      showToast('Failed to fetch video list', 'error')
     } finally {
       setIsLoading(false)
-
-      showToast('Failed to fetch video list', 'info')
     }
   }
 
@@ -122,6 +122,7 @@ export function VideoConverter() {
       pollStatus(result.data.task_id)
     } catch (error) {
       console.error(error)
+      showToast('Failed to generate video', 'error')
     } finally {
       setIsLoading(false)
     }
@@ -152,6 +153,7 @@ export function VideoConverter() {
       }
     } catch (error) {
       console.error('Polling error:', error)
+      showToast('Failed to generate video', 'error')
       setIsLoading(false)
     }
   }
