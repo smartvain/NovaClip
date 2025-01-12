@@ -76,7 +76,7 @@ export function VideoConverter() {
       }
 
       const result = await klingaiClient.queryTaskListImageToVideo()
-      console.log('result: ', result)
+
       const videoUrls = result.data
         .map((task) => task.task_result?.videos?.[0].url || '')
         .filter((url) => url !== '')
@@ -86,7 +86,7 @@ export function VideoConverter() {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(videoUrls))
       }
     } catch (error) {
-      console.error('Error:', error)
+      console.error(error)
     } finally {
       setIsLoading(false)
     }
@@ -113,12 +113,9 @@ export function VideoConverter() {
 
       pollStatus(result.data.task_id)
     } catch (error) {
-      console.error('Error:', error)
-      setError('エラーが発生しました')
-      setIsLoading(false)
+      console.error(error)
     } finally {
       setIsLoading(false)
-      console.log('動画生成が完了しました')
     }
   }
 
@@ -129,13 +126,10 @@ export function VideoConverter() {
         task_id: taskId,
       })
 
-      console.log('queryTaskImageToVideoResponse: ', response)
-
       const isComplete = response.data.task_status === 'succeed'
       const isFailed = response.data.task_status === 'failed' // エラー状態の確認を追加
 
       if (isFailed) {
-        setError('動画の生成に失敗しました')
         setIsLoading(false)
         return
       }
@@ -150,7 +144,6 @@ export function VideoConverter() {
       }
     } catch (error) {
       console.error('Polling error:', error)
-      setError('ポーリング中にエラーが発生しました')
       setIsLoading(false)
     }
   }
