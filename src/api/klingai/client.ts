@@ -16,7 +16,7 @@ class KlingaiClient {
   ): Promise<CreateTaskImageToVideoResponse> {
     validateCreateTaskImageToVideo(params)
 
-    const response = await fetch(API_ROUTE_ENDPOINTS.IMAGE_TO_VIDEO.CREATE_TASK, {
+    const response = await fetch(API_ROUTE_ENDPOINTS.KLINGAI.IMAGE_TO_VIDEO.CREATE_TASK, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ class KlingaiClient {
       queryParams.append('external_task_id', params.external_task_id)
     }
 
-    const url = `${API_ROUTE_ENDPOINTS.IMAGE_TO_VIDEO.QUERY_TASK}?${queryParams.toString()}`
+    const url = `${API_ROUTE_ENDPOINTS.KLINGAI.IMAGE_TO_VIDEO.QUERY_TASK}?${queryParams.toString()}`
 
     const response = await fetch(url, {
       method: 'GET',
@@ -69,7 +69,7 @@ class KlingaiClient {
       pageSize: params?.pageSize || '30',
     })
 
-    const url = `${API_ROUTE_ENDPOINTS.IMAGE_TO_VIDEO.QUERY_TASK_LIST}?${queryParams.toString()}`
+    const url = `${API_ROUTE_ENDPOINTS.KLINGAI.IMAGE_TO_VIDEO.QUERY_TASK_LIST}?${queryParams.toString()}`
 
     const response = await fetch(url, {
       method: 'GET',

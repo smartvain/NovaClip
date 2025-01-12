@@ -238,7 +238,7 @@ export function VideoConverter() {
         <VideoDisplay videoUrl={videoUrl} isLoading={isLoading} onClose={() => setVideoUrl('')} />
       </div>
 
-      <div>
+      <div className="flex">
         <VideoSidebar
           isOpen={isSidebarOpen}
           isLoading={isLoading}
