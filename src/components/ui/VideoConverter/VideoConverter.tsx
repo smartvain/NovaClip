@@ -3,13 +3,17 @@
 import { useEffect, useState } from 'react'
 
 import { klingaiClient } from '@/api/klingai'
-import { PromptTextarea, ImageUploader, SelectField } from '@/components/ui'
+import {
+  PromptTextarea,
+  ImageUploader,
+  SelectField,
+  VideoDisplay,
+  VideoSidebar,
+  useToast,
+} from '@/components/ui'
 import { MODEL_LIST, MODE_LIST, DURATION_LIST } from '@/constants/generateVideoSettings'
 import { useSelectValue } from '@/hooks'
 import { useImageProcessor } from '@/hooks'
-
-import { VideoDisplay } from '../VideoDisplay/VideoDisplay'
-import { VideoSidebar } from '../VideoSidebar/VideoSidebar'
 
 const initialPrompt =
   'Create a natural, fluid animation with subtle human-like movements:' +
@@ -30,7 +34,6 @@ const LOCAL_STORAGE_KEY = 'klingai_video_urls'
 
 export function VideoConverter() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string>('')
   const [videoUrl, setVideoUrl] = useState<string>('')
 
   // ui
@@ -47,6 +50,8 @@ export function VideoConverter() {
   const duration = useSelectValue(DURATION_LIST.SHORT.value, DURATION_LIST)
   const { processImage, imageUrl, imagePreviewUrl, setImageUrl, setImagePreviewUrl } =
     useImageProcessor()
+
+  const { showToast } = useToast()
 
   // ファイル選択時の処理
   const handleSelectImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,6 +97,8 @@ export function VideoConverter() {
       console.error(error)
     } finally {
       setIsLoading(false)
+
+      showToast('Failed to fetch video list', 'info')
     }
   }
 
@@ -99,8 +106,6 @@ export function VideoConverter() {
   const handleGenerateVideoFromImage = async () => {
     try {
       setIsLoading(true)
-      setError('')
-      setVideoUrl('')
 
       const params = {
         image: imageUrl || '',

@@ -1,4 +1,5 @@
 import { Header } from '@/components/layout'
+import { ToastProvider } from '@/components/ui'
 import { Provider } from '@/components/ui/Provider'
 
 import type { Metadata } from 'next'
@@ -18,8 +19,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Provider>
-          <Header />
-          <main className="mt-16 h-[calc(100vh-4rem)]">{children}</main>
+          <ToastProvider>
+            <Header />
+            <main className="mt-16 h-[calc(100vh-4rem)]">{children}</main>
+          </ToastProvider>
         </Provider>
       </body>
     </html>
