@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { klingaiClient } from '@/api/klingai'
+import { minimaxClient } from '@/api/minimax'
 import {
   PromptTextarea,
   ImageUploader,
@@ -11,7 +12,13 @@ import {
   VideoSidebar,
   useToast,
 } from '@/components/ui'
-import { MODEL_LIST, MODE_LIST, DURATION_LIST } from '@/constants/generateVideoSettings'
+import {
+  KLING_AI_MODEL_LIST,
+  MINIMAX_MODEL_LIST,
+  MODE_LIST,
+  DURATION_LIST,
+  KlingModelType,
+} from '@/constants/generateVideoSettings'
 import { useSelectValue } from '@/hooks'
 import { useImageProcessor } from '@/hooks'
 
@@ -32,6 +39,8 @@ const initialNegativePrompt =
 
 const LOCAL_STORAGE_KEY = 'klingai_video_urls'
 
+type MinimaxModelType = (typeof MINIMAX_MODEL_LIST)[keyof typeof MINIMAX_MODEL_LIST]['value']
+
 export function VideoConverter() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [videoUrl, setVideoUrl] = useState<string>('')
@@ -45,7 +54,10 @@ export function VideoConverter() {
   // ユーザー入力項目
   const [prompt, setPrompt] = useState<string>('')
   const [negative_prompt, setNegativePrompt] = useState<string>('')
-  const model = useSelectValue(MODEL_LIST.KLING_V1_6.value, MODEL_LIST)
+  const model = useSelectValue(KLING_AI_MODEL_LIST.KLING_V1_6.value, {
+    ...KLING_AI_MODEL_LIST,
+    ...MINIMAX_MODEL_LIST,
+  })
   const mode = useSelectValue(MODE_LIST.STANDARD.value, MODE_LIST)
   const duration = useSelectValue(DURATION_LIST.SHORT.value, DURATION_LIST)
   const { processImage, imageUrl, imagePreviewUrl, setImageUrl, setImagePreviewUrl } =
@@ -102,14 +114,45 @@ export function VideoConverter() {
     }
   }
 
-  // 画像から動画を生成
-  const handleGenerateVideoFromImage = async () => {
+  const isKlingModel = (model: string): model is KlingModelType => {
+    return Object.values(KLING_AI_MODEL_LIST).some((m) => m.value === model)
+  }
+
+  const handleMinimaxGenerateVideoFromImage = async () => {
     try {
       setIsLoading(true)
 
+      // klingのモデルが選択されていたらminimaxのモデルに強制変更
+      const modelName = isKlingModel(model.value) ? MINIMAX_MODEL_LIST.VIDEO_01.value : model.value
+
+      const params = {
+        first_frame_image: imageUrl || '',
+        model: modelName,
+        prompt: `${prompt}, ${initialPrompt}`,
+      }
+
+      const result = await minimaxClient.createTaskImageToVideo(params)
+
+      pollStatus(result.data.task_id)
+    } catch (error) {
+      console.error(error)
+      showToast('Failed to generate video', 'error')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // 画像から動画を生成
+  const handleKlingGenerateVideoFromImage = async () => {
+    try {
+      setIsLoading(true)
+
+      // minimaxのモデルが選択されていたらklingのモデルに強制変更
+      const modelName = model.value === 'video-01' ? 'kling-v1-6' : model.value
+
       const params = {
         image: imageUrl || '',
-        model_name: model.value,
+        model_name: modelName,
         mode: mode.value,
         duration: duration.value,
         prompt: `${prompt}, ${initialPrompt}`,
@@ -198,7 +241,7 @@ export function VideoConverter() {
                 label="Model"
                 value={model.value}
                 onChange={model.onChange}
-                options={MODEL_LIST}
+                options={KLING_AI_MODEL_LIST}
                 className="mt-4"
               />
 
@@ -225,7 +268,7 @@ export function VideoConverter() {
 
         <div className="mt-4">
           <button
-            onClick={handleGenerateVideoFromImage}
+            onClick={handleKlingGenerateVideoFromImage}
             disabled={!imageUrl || isLoading}
             className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
