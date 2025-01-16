@@ -55,7 +55,7 @@ class KlingaiClient {
     })
 
     if (!response.ok) {
-      throw new Error('Failed to execute queryTaskListImageToVideo')
+      throw new Error('Failed to execute queryTaskImageToVideo')
     }
 
     return response.json()
