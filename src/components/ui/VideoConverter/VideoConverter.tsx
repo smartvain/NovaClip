@@ -2,202 +2,95 @@
 
 import { useEffect, useState } from 'react'
 
-import { klingaiClient } from '@/api/klingai'
-import { minimaxClient } from '@/api/minimax'
 import {
   PromptTextarea,
   ImageUploader,
   SelectField,
   VideoDisplay,
   VideoSidebar,
-  useToast,
 } from '@/components/ui'
 import {
   KLING_AI_MODEL_LIST,
   MINIMAX_MODEL_LIST,
   MODE_LIST,
   DURATION_LIST,
-  KlingModelType,
 } from '@/constants/generateVideoSettings'
-import { useSelectValue } from '@/hooks'
-import { useImageProcessor } from '@/hooks'
+import { useSelectValue, useImageProcessor, useMinimax, useKlingAI, usePrompt } from '@/hooks'
+import { isKlingModel } from '@/lib/utils'
 
-const initialPrompt =
-  'Create a natural, fluid animation with subtle human-like movements:' +
-  '- Maintain gentle, organic motion' +
-  '- Add slight breathing movement' +
-  '- Include minimal head tilt and micro-expressions' +
-  '- Ensure smooth transitions between frames' +
-  '- Keep movements delicate and realistic' +
-  '- Preserve the original image quality' +
-  '- Apply natural motion physics'
-
-const initialNegativePrompt =
-  'lowres, (worst quality, bad quality:1.2), bad anatomy, sketch, ' +
-  'jpeg artifacts, signature, watermark, old, oldest, censored, bar_censor, ' +
-  '(pregnant), chibi, loli, simple background'
-
-const LOCAL_STORAGE_KEY = 'klingai_video_urls'
-
-type MinimaxModelType = (typeof MINIMAX_MODEL_LIST)[keyof typeof MINIMAX_MODEL_LIST]['value']
+const ALL_MODELS = { ...KLING_AI_MODEL_LIST, ...MINIMAX_MODEL_LIST }
 
 export function VideoConverter() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [videoUrl, setVideoUrl] = useState<string>('')
 
   // ui
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true)
 
-  // 生成済み動画一覧
-  const [videoList, setVideoList] = useState<string[]>([])
-
   // ユーザー入力項目
-  const [prompt, setPrompt] = useState<string>('')
-  const [negative_prompt, setNegativePrompt] = useState<string>('')
-  const model = useSelectValue(KLING_AI_MODEL_LIST.KLING_V1_6.value, {
-    ...KLING_AI_MODEL_LIST,
-    ...MINIMAX_MODEL_LIST,
-  })
+  const {
+    prompt,
+    negativePrompt,
+    setPrompt,
+    setNegativePrompt,
+    atatchInitialPrompt,
+    atatchInitialNegativePrompt,
+  } = usePrompt()
+
+  const model = useSelectValue(MINIMAX_MODEL_LIST.VIDEO_01_LIVE2D.value, ALL_MODELS)
   const mode = useSelectValue(MODE_LIST.STANDARD.value, MODE_LIST)
   const duration = useSelectValue(DURATION_LIST.SHORT.value, DURATION_LIST)
-  const { processImage, imageUrl, imagePreviewUrl, setImageUrl, setImagePreviewUrl } =
-    useImageProcessor()
 
-  const { showToast } = useToast()
+  const {
+    processImageForKling,
+    processImageForMinimax,
+    imageUrl,
+    imagePreviewUrl,
+    handleRemovePreviewImage,
+  } = useImageProcessor()
 
-  // ファイル選択時の処理
+  const { handleQueryTaskForMinimax, handleMinimaxGenerateVideoFromImage } =
+    useMinimax(setIsLoading)
+
+  const {
+    handleKlingGenerateVideoFromImage,
+    handleQueryTaskList,
+    videoList,
+    videoUrl,
+    setVideoUrl,
+  } = useKlingAI(setIsLoading)
+
   const handleSelectImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const { isValid, error } = await processImage(file)
+    const { isValid, error } = isKlingModel(model.value)
+      ? await processImageForKling(file)
+      : await processImageForMinimax(file)
+
     if (!isValid && error) {
       alert(error)
     }
   }
 
-  // 画像を削除時の処理
-  const handleRemovePreviewImage = () => {
-    setImageUrl(null)
-    setImagePreviewUrl(null)
-    const input = document.getElementById('image') as HTMLInputElement
-    if (input) input.value = ''
-  }
-
-  // 生成済みの動画一覧を取得
-  const handleQueryTaskList = async (isCache: boolean = false) => {
-    try {
-      setIsLoading(true)
-
-      const cachedUrlsText = isCache ? localStorage.getItem(LOCAL_STORAGE_KEY) : null
-      if (cachedUrlsText) {
-        setVideoList(JSON.parse(cachedUrlsText))
-        return
-      }
-
-      const result = await klingaiClient.queryTaskListImageToVideo()
-
-      const videoUrls = result.data
-        .map((task) => task.task_result?.videos?.[0].url || '')
-        .filter((url) => url !== '')
-
-      if (videoUrls && videoUrls.length > 0) {
-        setVideoList(videoUrls)
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(videoUrls))
-      }
-      showToast('Video list updated successfully', 'info')
-    } catch (error) {
-      console.error(error)
-      showToast('Failed to fetch video list', 'error')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const isKlingModel = (model: string): model is KlingModelType => {
-    return Object.values(KLING_AI_MODEL_LIST).some((m) => m.value === model)
-  }
-
-  const handleMinimaxGenerateVideoFromImage = async () => {
-    try {
-      setIsLoading(true)
-
-      // klingのモデルが選択されていたらminimaxのモデルに強制変更
-      const modelName = isKlingModel(model.value) ? MINIMAX_MODEL_LIST.VIDEO_01.value : model.value
-
-      const params = {
-        first_frame_image: imageUrl || '',
-        model: modelName,
-        prompt: `${prompt}, ${initialPrompt}`,
-      }
-
-      const result = await minimaxClient.createTaskImageToVideo(params)
-
-      pollStatus(result.data.task_id)
-    } catch (error) {
-      console.error(error)
-      showToast('Failed to generate video', 'error')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // 画像から動画を生成
-  const handleKlingGenerateVideoFromImage = async () => {
-    try {
-      setIsLoading(true)
-
-      // minimaxのモデルが選択されていたらklingのモデルに強制変更
-      const modelName = model.value === 'video-01' ? 'kling-v1-6' : model.value
-
+  const handleGenerateVideo = () => {
+    if (isKlingModel(model.value)) {
       const params = {
         image: imageUrl || '',
-        model_name: modelName,
+        model_name: model.value,
         mode: mode.value,
         duration: duration.value,
-        prompt: `${prompt}, ${initialPrompt}`,
-        negative_prompt: `${negative_prompt}, ${initialNegativePrompt}`,
+        prompt: atatchInitialPrompt(prompt),
+        negative_prompt: atatchInitialNegativePrompt(negativePrompt),
         cfg_scale: 0.5,
       }
-
-      const result = await klingaiClient.createTaskImageToVideo(params)
-
-      pollStatus(result.data.task_id)
-    } catch (error) {
-      console.error(error)
-      showToast('Failed to generate video', 'error')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // ポーリング処理
-  const pollStatus = async (taskId: string) => {
-    try {
-      const response = await klingaiClient.queryTaskImageToVideo({
-        task_id: taskId,
-      })
-
-      const isComplete = response.data.task_status === 'succeed'
-      const isFailed = response.data.task_status === 'failed' // エラー状態の確認を追加
-
-      if (isFailed) {
-        setIsLoading(false)
-        return
+      handleKlingGenerateVideoFromImage(params)
+    } else {
+      const params = {
+        first_frame_image: imageUrl || '',
+        model: model.value,
+        prompt: atatchInitialPrompt(prompt),
       }
-
-      if (!isComplete) {
-        // ５秒後に再度確認
-        setTimeout(() => pollStatus(taskId), 5000)
-      } else {
-        const videoUrl = response.data.task_result?.videos?.[0].url || ''
-        setVideoUrl(videoUrl)
-        setIsLoading(false)
-      }
-    } catch (error) {
-      console.error('Polling error:', error)
-      showToast('Failed to generate video', 'error')
-      setIsLoading(false)
+      handleMinimaxGenerateVideoFromImage(params)
     }
   }
 
@@ -220,7 +113,7 @@ export function VideoConverter() {
           <PromptTextarea
             className="mt-4"
             label="Negative Prompt"
-            value={negative_prompt}
+            value={negativePrompt}
             onChange={setNegativePrompt}
             placeholder="Enter your negative prompt here..."
           />
@@ -241,7 +134,7 @@ export function VideoConverter() {
                 label="Model"
                 value={model.value}
                 onChange={model.onChange}
-                options={KLING_AI_MODEL_LIST}
+                options={ALL_MODELS}
                 className="mt-4"
               />
 
@@ -268,7 +161,7 @@ export function VideoConverter() {
 
         <div className="mt-4">
           <button
-            onClick={handleKlingGenerateVideoFromImage}
+            onClick={handleGenerateVideo}
             disabled={!imageUrl || isLoading}
             className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -287,7 +180,7 @@ export function VideoConverter() {
           isLoading={isLoading}
           videoList={videoList}
           onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-          onRefresh={() => handleQueryTaskList()}
+          onRefresh={() => handleQueryTaskForMinimax()}
           onSelectVideo={setVideoUrl}
         />
       </div>

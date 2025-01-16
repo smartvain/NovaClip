@@ -1,2 +1,5 @@
 export * from './useImageProcessor'
 export * from './useSelectValue'
+export * from './useMinimax'
+export * from './useKlingAI'
+export * from './usePrompt'
