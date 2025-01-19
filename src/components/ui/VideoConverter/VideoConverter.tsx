@@ -48,14 +48,17 @@ export function VideoConverter() {
     handleRemovePreviewImage,
   } = useImageProcessor()
 
-  const { handleQueryTaskForMinimax, handleMinimaxGenerateVideoFromImage } =
-    useMinimax(setIsLoading)
+  const {
+    handleQueryTask: handleQueryTaskForMinimax,
+    handleGenerateVideoFromImage: handleMinimaxGenerateVideoFromImage,
+    downloadUrl,
+  } = useMinimax(setIsLoading)
 
   const {
     handleKlingGenerateVideoFromImage,
     handleQueryTaskList,
     videoList,
-    videoUrl,
+    // videoUrl,
     setVideoUrl,
   } = useKlingAI(setIsLoading)
 
@@ -171,7 +174,11 @@ export function VideoConverter() {
       </div>
 
       <div className="flex-grow p-4 overflow-y-auto">
-        <VideoDisplay videoUrl={videoUrl} isLoading={isLoading} onClose={() => setVideoUrl('')} />
+        <VideoDisplay
+          videoUrl={downloadUrl}
+          isLoading={isLoading}
+          onClose={() => setVideoUrl('')}
+        />
       </div>
 
       <div className="flex">
@@ -180,7 +187,8 @@ export function VideoConverter() {
           isLoading={isLoading}
           videoList={videoList}
           onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-          onRefresh={() => handleQueryTaskForMinimax()}
+          // onRefresh={() => handleQueryTaskForMinimax()}
+          onRefresh={() => console.log('onRefresh')}
           onSelectVideo={setVideoUrl}
         />
       </div>
