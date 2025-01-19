@@ -5,6 +5,8 @@ import {
   CreateTaskImageToVideoResponse,
   QueryTaskImageToVideoRequest,
   QueryTaskImageToVideoResponse,
+  RetrieveDownloadURLRequest,
+  RetrieveDownloadURLResponse,
 } from './types'
 
 class MinimaxClient {
@@ -29,10 +31,6 @@ class MinimaxClient {
   async queryTaskImageToVideo(
     params: QueryTaskImageToVideoRequest
   ): Promise<QueryTaskImageToVideoResponse> {
-    if (!params.task_id) {
-      throw new Error('Task_id is required')
-    }
-
     const queryParams = new URLSearchParams()
     queryParams.append('task_id', params.task_id)
 
@@ -52,8 +50,26 @@ class MinimaxClient {
     return response.json()
   }
 
-  async queryTaskListImageToVideo() {
-    // TODO: implement
+  async retrieveDownloadURL(
+    params: Omit<RetrieveDownloadURLRequest, 'GroupId'>
+  ): Promise<RetrieveDownloadURLResponse> {
+    const queryParams = new URLSearchParams()
+    queryParams.append('file_id', params.file_id)
+
+    const url = `${API_ROUTE_ENDPOINTS.MINIMAX.IMAGE_TO_VIDEO.RETRIEVE_DOWNLOAD_URL}?${queryParams.toString()}`
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to execute retrieveDownloadURL')
+    }
+
+    return response.json()
   }
 }
 
