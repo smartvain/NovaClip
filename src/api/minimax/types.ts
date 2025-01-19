@@ -29,3 +29,21 @@ export interface QueryTaskImageToVideoResponse {
     status_msg: string
   }
 }
+
+export interface RetrieveDownloadURLRequest {
+  file_id: string
+  GroupId: string
+}
+
+export interface RetrieveDownloadURLResponse {
+  file_id: string
+  bytes: number
+  created_at: number
+  filename: string
+  purpose: string
+  download_url: string
+  base_resp: {
+    status_code: number
+    status_msg: string
+  }
+}
