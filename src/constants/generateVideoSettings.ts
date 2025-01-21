@@ -1,4 +1,4 @@
-export const MODEL_LIST = {
+export const KLING_AI_MODEL_LIST = {
   KLING_V1_6: {
     value: 'kling-v1-6',
     label: 'Kling 1.6',
@@ -12,6 +12,19 @@ export const MODEL_LIST = {
     label: 'Kling 1.0',
   },
 } as const
+export type KlingModelType = (typeof KLING_AI_MODEL_LIST)[keyof typeof KLING_AI_MODEL_LIST]['value']
+
+export const MINIMAX_MODEL_LIST = {
+  VIDEO_01: {
+    value: 'video-01',
+    label: 'Video 01',
+  },
+  VIDEO_01_LIVE2D: {
+    value: 'video-01-live2d',
+    label: 'Video 01 Live2D',
+  },
+} as const
+export type MinimaxModelType = (typeof MINIMAX_MODEL_LIST)[keyof typeof MINIMAX_MODEL_LIST]['value']
 
 export const MODE_LIST = {
   STANDARD: {

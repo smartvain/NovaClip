@@ -6,6 +6,14 @@ interface ImageValidationRules {
   aspectRatioRange: { min: number; max: number }
 }
 
+type ProcessImageResult = { isValid: boolean; error?: string }
+
+const ERROR_MESSAGES = {
+  INVALID_FORMAT: 'JPG または PNG 形式の画像のみ対応しています。',
+  INVALID_CONSTRAINTS:
+    '画像は300x300px以上、アスペクト比1:2.5〜2.5:1の範囲内、10MB以下である必要があります。',
+} as const
+
 export const useImageProcessor = (
   validationRules: ImageValidationRules = {
     minDimensions: { width: 300, height: 300 },
@@ -42,18 +50,27 @@ export const useImageProcessor = (
     return base64String.replace(base64Prefix, '')
   }
 
-  const processImage = async (file: File): Promise<{ isValid: boolean; error?: string }> => {
-    if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {
-      return { isValid: false, error: 'JPG または PNG 形式の画像のみ対応しています。' }
+  const isValidImageFormat = (file: File): boolean => {
+    return Boolean(file.type.match(/^image\/(jpeg|jpg|png)$/))
+  }
+
+  const validateImageWithFormat = async (file: File): Promise<ProcessImageResult> => {
+    if (!isValidImageFormat(file)) {
+      return { isValid: false, error: ERROR_MESSAGES.INVALID_FORMAT }
     }
 
     const isValid = await validateImage(file)
     if (!isValid) {
-      return {
-        isValid: false,
-        error:
-          '画像は300x300px以上、アスペクト比1:2.5〜2.5:1の範囲内、10MB以下である必要があります。',
-      }
+      return { isValid: false, error: ERROR_MESSAGES.INVALID_CONSTRAINTS }
+    }
+
+    return { isValid: true }
+  }
+
+  const processImageForKling = async (file: File): Promise<ProcessImageResult> => {
+    const validationResult = await validateImageWithFormat(file)
+    if (!validationResult.isValid) {
+      return validationResult
     }
 
     return new Promise((resolve) => {
@@ -69,11 +86,39 @@ export const useImageProcessor = (
     })
   }
 
+  const processImageForMinimax = async (file: File): Promise<ProcessImageResult> => {
+    const validationResult = await validateImageWithFormat(file)
+    if (!validationResult.isValid) {
+      return validationResult
+    }
+
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setImagePreviewUrl(reader.result)
+          setImageUrl(reader.result)
+          resolve({ isValid: true })
+        }
+      }
+      reader.readAsDataURL(file)
+    })
+  }
+
+  const handleRemovePreviewImage = () => {
+    setImageUrl(null)
+    setImagePreviewUrl(null)
+    const input = document.getElementById('image') as HTMLInputElement
+    if (input) input.value = ''
+  }
+
   return {
     imagePreviewUrl,
     imageUrl,
     setImagePreviewUrl,
     setImageUrl,
-    processImage,
+    processImageForKling,
+    processImageForMinimax,
+    handleRemovePreviewImage,
   }
 }

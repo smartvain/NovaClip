@@ -1,22 +1,19 @@
 import { API_ROUTE_ENDPOINTS } from '@/constants/endpoints'
-import { validateCreateTaskImageToVideo } from '@/lib/api/klingai_validation'
 
 import {
   CreateTaskImageToVideoRequest,
   CreateTaskImageToVideoResponse,
   QueryTaskImageToVideoRequest,
   QueryTaskImageToVideoResponse,
-  QueryTaskListImageToVideoRequest,
-  QueryTaskListImageToVideoResponse,
+  RetrieveDownloadURLRequest,
+  RetrieveDownloadURLResponse,
 } from './types'
 
-class KlingaiClient {
+class MinimaxClient {
   async createTaskImageToVideo(
     params: CreateTaskImageToVideoRequest
   ): Promise<CreateTaskImageToVideoResponse> {
-    validateCreateTaskImageToVideo(params)
-
-    const response = await fetch(API_ROUTE_ENDPOINTS.KLINGAI.IMAGE_TO_VIDEO.CREATE_TASK, {
+    const response = await fetch(API_ROUTE_ENDPOINTS.MINIMAX.IMAGE_TO_VIDEO.CREATE_TASK, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -34,18 +31,10 @@ class KlingaiClient {
   async queryTaskImageToVideo(
     params: QueryTaskImageToVideoRequest
   ): Promise<QueryTaskImageToVideoResponse> {
-    if (!params.task_id && !params.external_task_id) {
-      throw new Error('Either task_id or external_task_id is required')
-    }
-
     const queryParams = new URLSearchParams()
-    if (params.task_id) {
-      queryParams.append('task_id', params.task_id)
-    } else if (params.external_task_id) {
-      queryParams.append('external_task_id', params.external_task_id)
-    }
+    queryParams.append('task_id', params.task_id)
 
-    const url = `${API_ROUTE_ENDPOINTS.KLINGAI.IMAGE_TO_VIDEO.QUERY_TASK}?${queryParams.toString()}`
+    const url = `${API_ROUTE_ENDPOINTS.MINIMAX.IMAGE_TO_VIDEO.QUERY_TASK}?${queryParams.toString()}`
 
     const response = await fetch(url, {
       method: 'GET',
@@ -61,15 +50,13 @@ class KlingaiClient {
     return response.json()
   }
 
-  async queryTaskListImageToVideo(
-    params?: QueryTaskListImageToVideoRequest
-  ): Promise<QueryTaskListImageToVideoResponse> {
-    const queryParams = new URLSearchParams({
-      pageNum: params?.pageNum || '1',
-      pageSize: params?.pageSize || '30',
-    })
+  async retrieveDownloadURL(
+    params: Omit<RetrieveDownloadURLRequest, 'GroupId'>
+  ): Promise<RetrieveDownloadURLResponse> {
+    const queryParams = new URLSearchParams()
+    queryParams.append('file_id', params.file_id)
 
-    const url = `${API_ROUTE_ENDPOINTS.KLINGAI.IMAGE_TO_VIDEO.QUERY_TASK_LIST}?${queryParams.toString()}`
+    const url = `${API_ROUTE_ENDPOINTS.MINIMAX.IMAGE_TO_VIDEO.RETRIEVE_DOWNLOAD_URL}?${queryParams.toString()}`
 
     const response = await fetch(url, {
       method: 'GET',
@@ -79,11 +66,11 @@ class KlingaiClient {
     })
 
     if (!response.ok) {
-      throw new Error('Failed to execute queryTaskListImageToVideo')
+      throw new Error('Failed to execute retrieveDownloadURL')
     }
 
     return response.json()
   }
 }
 
-export const klingaiClient = new KlingaiClient()
+export const minimaxClient = new MinimaxClient()
